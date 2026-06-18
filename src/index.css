@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar for dense data tables */
+::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+::-webkit-scrollbar-track { 
+  @apply bg-brand-midnight-base; 
+}
+::-webkit-scrollbar-thumb { 
+  @apply bg-brand-midnight-border rounded-[3px]; 
+}
+::-webkit-scrollbar-thumb:hover { 
+  @apply bg-brand-teal; 
+}

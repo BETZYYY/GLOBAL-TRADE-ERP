@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Credit Risk Scoring - GLOBALTRADE ERP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2a41",
+                        "surface-dim": "#04132a",
+                        "surface-tint": "#6cd3f7",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "primary-container": "#269dbe",
+                        "primary": "#6cd3f7",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "on-tertiary-fixed": "#00201d",
+                        "secondary-fixed": "#acedff",
+                        "secondary-container": "#03b5d3",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "on-secondary-container": "#00424e",
+                        "background": "#04132a",
+                        "on-secondary": "#003640",
+                        "surface-container-low": "#0d1c32",
+                        "on-tertiary": "#003732",
+                        "on-primary-fixed": "#001f28",
+                        "tertiary-container": "#29a195",
+                        "outline-variant": "#3e484d",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#d6e3ff",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#004e61",
+                        "secondary": "#4cd7f6",
+                        "on-primary-container": "#002e3b",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "inverse-primary": "#006780",
+                        "surface-container-lowest": "#010e24",
+                        "surface-container": "#112036",
+                        "surface-bright": "#2c3952",
+                        "surface-variant": "#27354d",
+                        "on-tertiary-container": "#00302b",
+                        "tertiary": "#6bd8cb",
+                        "on-surface-variant": "#bdc8ce",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "primary-fixed": "#b7eaff",
+                        "inverse-on-surface": "#233148",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001f26",
+                        "tertiary-fixed": "#89f5e7",
+                        "on-surface": "#d6e3ff",
+                        "surface": "#04132a",
+                        "on-primary": "#003543",
+                        "on-background": "#d6e3ff",
+                        "surface-container-highest": "#27354d",
+                        "outline": "#879298",
+                        
+                        // Overrides based on Style Guidance for high contrast dark theme
+                        "nav-bg": "#04132a", // Deep Midnight Navy Base Level 0
+                        "card-bg": "#16243B", // Level 1
+                        "modal-bg": "#1E2D44", // Level 2
+                        "border-ghost": "#1E3A5F",
+                        "teal-accent": "#0891B2",
+                        "text-primary": "#F8FAFC",
+                        "text-secondary": "#94A3B8",
+                        "table-header": "#1E2D44",
+                        "table-row-odd": "#16243B",
+                        "table-row-even": "#192E48"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "card": "12px",
+                        "button": "8px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "sidebar_width_expanded": "240px",
+                        "sidebar_width_collapsed": "56px",
+                        "row_height_table": "40px",
+                        "container_padding": "24px",
+                        "button_height": "40px",
+                        "density-base": "8px"
+                    },
+                    "fontFamily": {
+                        "h3-caps": ["Inter"],
+                        "h1": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body": ["Inter"],
+                        "label-xs": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "h1": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-xs": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "h2": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0F1B2D; color: #F8FAFC; }
+        .ghost-border { border: 1px solid #1E3A5F; }
+        .teal-border-focus:focus-within { border-color: #0891B2; box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2); }
+        
+        .gauge-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+        .gauge-track {
+            fill: none;
+            stroke: #1E3A5F;
+            stroke-width: 16;
+            stroke-linecap: round;
+        }
+        .gauge-progress {
+            fill: none;
+            stroke: #16A34A; /* Low Risk Green */
+            stroke-width: 16;
+            stroke-linecap: round;
+            stroke-dasharray: 600;
+            stroke-dashoffset: 200; /* Adjust for 72 score roughly */
+            transition: stroke-dashoffset 1s ease-out;
+        }
+        .gauge-needle {
+            transform-origin: 120px 120px;
+            transform: rotate(-45deg); /* Base rotation */
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .progress-bar-bg { background-color: #1E2D44; border-radius: 4px; height: 8px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 4px; }
+        
+        .badge-high-risk { background-color: rgba(220, 38, 38, 0.2); color: #DC2626; border: 1px solid #DC2626; }
+        .badge-low-risk { background-color: rgba(22, 163, 74, 0.2); color: #22C55E; border: 1px solid #16A34A; }
+        .badge-med-risk { background-color: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid #F59E0B; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden font-body text-body selection:bg-teal-accent selection:text-white">
+<!-- SideNavBar -->
+<nav aria-label="Sidebar" class="bg-nav-bg text-primary flex flex-col h-full fixed left-0 top-0 z-40 docked left-0 w-sidebar_width_collapsed hover:w-sidebar_width_expanded transition-all duration-300 border-r border-outline-variant flat no shadows group cursor-pointer">
+<!-- Header -->
+<div class="p-4 flex items-center gap-4 border-b border-outline-variant whitespace-nowrap overflow-hidden">
+<div class="w-8 h-8 rounded bg-teal-accent flex-shrink-0 flex items-center justify-center font-bold text-white">GT</div>
+<div class="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span class="font-h3-caps text-h3-caps text-primary uppercase tracking-wider">GLOBALTRADE</span>
+<span class="text-xs text-text-secondary">Treasury Risk</span>
+</div>
+</div>
+<!-- Main Nav Tabs -->
+<div class="flex-1 py-4 overflow-y-auto overflow-x-hidden">
+<ul class="flex flex-col gap-1 px-2">
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="dashboard">dashboard</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Risk Overview</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="swap_horiz">swap_horiz</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Transactions</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="shield">shield</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Hedging</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="payments">payments</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Payment Terms</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="currency_exchange">currency_exchange</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Currency Basket</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-primary border-l-4 border-primary bg-surface-container-highest transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="gavel" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Credit Risk</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="currency_bitcoin">currency_bitcoin</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Crypto Settlement</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="assessment">assessment</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Reports</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Footer Nav Tabs -->
+<div class="mt-auto py-4 border-t border-outline-variant overflow-x-hidden">
+<ul class="flex flex-col gap-1 px-2">
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="settings">settings</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="logout">logout</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-label-xs text-label-xs">Logout</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Workspace -->
+<div class="flex-1 flex flex-col ml-sidebar_width_collapsed h-full bg-[#0F1B2D]">
+<!-- TopNavBar -->
+<header class="bg-nav-bg text-primary font-body text-body docked full-width top-0 border-b border-outline-variant flat no shadows flex justify-between items-center px-container_padding h-[64px] w-full z-30 shrink-0">
+<!-- Left: Breadcrumb & Title (Contextual to page, replacing generic brand logo if needed, but per prompt keeping brand logic intact and adding breadcrumb below or here. Let's merge them elegantly) -->
+<div class="flex items-center gap-4">
+<h1 class="font-h1 text-h1 text-primary tracking-tight hidden md:block">GLOBALTRADE ERP</h1>
+<div class="h-6 w-px bg-border-ghost hidden md:block"></div>
+<div class="flex items-center text-sm">
+<span class="text-text-secondary cursor-pointer hover:text-primary transition-colors">Credit Risk</span>
+<span class="material-symbols-outlined text-text-secondary mx-2 text-sm">chevron_right</span>
+<span class="text-text-primary font-medium">Credit Risk Scoring Global</span>
+</div>
+</div>
+<!-- Right: Search & Actions -->
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden lg:block w-64 teal-border-focus rounded-button bg-card-bg ghost-border transition-all">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-text-secondary text-sm">search</span>
+<input class="w-full bg-transparent border-none text-text-primary text-sm pl-9 pr-3 py-2 rounded-button focus:ring-0 placeholder:text-text-secondary" placeholder="Search entities..." type="text"/>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 text-text-secondary hover:text-primary relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#DC2626] rounded-full border border-nav-bg"></span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 text-text-secondary hover:text-primary">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 text-text-secondary hover:text-primary">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+<!-- Profile -->
+<div class="w-8 h-8 rounded-full bg-teal-accent overflow-hidden border border-border-ghost cursor-pointer ml-2">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional corporate headshot of a financial controller in a modern office environment, moody dramatic lighting, dark background, highly detailed portrait." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhQVgsZx97qhe_vgYi6pfL3ii0G3pp-DfsYPXHkx0gsgrSAf2uPzR25oTv2mKKV8N_sdnjKOhvTPpdM7q3GkP_pKVYyGVJbfqKsHCLvhw3UwzRhvcc3excveiVJ5N7_-QNBqWmuP8Ubh6gf3ir9YyN1VM6pp8_g6EEdgnRX8eV3j9tyeg2LXe0UFDvdqI9Tl1IiG4tcFeua0UGZ_DmbWEgebqra2YZKj5v6rjuzNPYGxxEAnABGG0-891dETUTMJcR_aKHdRnbV3E"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area (Fluid Grid 12 cols, 38% / 62% roughly maps to col-span-5 and col-span-7) -->
+<main class="flex-1 overflow-y-auto p-container_padding bg-[#0F1B2D]">
+<div class="grid grid-cols-12 gap-gutter h-full max-w-[1600px] mx-auto">
+<!-- LEFT COLUMN (38% ~ Col Span 5) -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-gutter">
+<!-- Partner Assessment Card -->
+<div class="bg-card-bg rounded-card ghost-border flex flex-col">
+<div class="p-4 border-b border-border-ghost flex justify-between items-center">
+<h2 class="font-h2 text-h2 text-text-primary">Partner Assessment</h2>
+<span class="material-symbols-outlined text-text-secondary cursor-pointer hover:text-primary">more_horiz</span>
+</div>
+<div class="p-4 flex flex-col gap-4">
+<!-- Company Info Fields -->
+<div class="grid grid-cols-1 gap-3">
+<div class="flex flex-col gap-1 teal-border-focus group">
+<label class="font-label-xs text-label-xs text-text-secondary uppercase">Entity Name</label>
+<div class="bg-nav-bg ghost-border rounded-button px-3 py-2 flex items-center group-focus-within:border-teal-accent transition-colors">
+<span class="material-symbols-outlined text-text-secondary mr-2 text-sm">domain</span>
+<input class="bg-transparent border-none text-text-primary text-sm p-0 w-full focus:ring-0 font-medium" type="text" value="Tanaka Trading"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1 teal-border-focus group">
+<label class="font-label-xs text-label-xs text-text-secondary uppercase">Jurisdiction</label>
+<div class="bg-nav-bg ghost-border rounded-button px-3 py-2 flex items-center group-focus-within:border-teal-accent transition-colors">
+<span class="material-symbols-outlined text-text-secondary mr-2 text-sm">public</span>
+<input class="bg-transparent border-none text-text-primary text-sm p-0 w-full focus:ring-0" type="text" value="Japan"/>
+</div>
+</div>
+<div class="flex flex-col gap-1 teal-border-focus group">
+<label class="font-label-xs text-label-xs text-text-secondary uppercase">Sector</label>
+<div class="bg-nav-bg ghost-border rounded-button px-3 py-2 flex items-center group-focus-within:border-teal-accent transition-colors">
+<span class="material-symbols-outlined text-text-secondary mr-2 text-sm">factory</span>
+<input class="bg-transparent border-none text-text-primary text-sm p-0 w-full focus:ring-0" type="text" value="Manufacturing"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Financial Statement Toggle -->
+<div class="flex items-center justify-between p-3 bg-nav-bg ghost-border rounded-button mt-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-teal-accent">description</span>
+<div>
+<p class="text-sm font-medium text-text-primary">Q3 Financials Attached</p>
+<p class="text-xs text-text-secondary font-data-mono">audited_stmt_Q3.pdf</p>
+</div>
+</div>
+<!-- Toggle Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-border-ghost peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-accent"></div>
+</label>
+</div>
+<!-- Action Button -->
+<button class="mt-4 bg-teal-accent text-white font-medium text-sm rounded-button h-button_height hover:bg-[#067a96] transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">calculate</span>
+                                Calculate Risk Score
+                            </button>
+</div>
+</div>
+<!-- Recent Assessments List -->
+<div class="bg-card-bg rounded-card ghost-border flex-1 flex flex-col min-h-[300px]">
+<div class="p-4 border-b border-border-ghost flex justify-between items-center">
+<h2 class="font-h2 text-h2 text-text-primary">Recent Assessments</h2>
+<button class="text-xs text-teal-accent hover:underline">View All</button>
+</div>
+<div class="flex flex-col">
+<!-- Row 1 -->
+<div class="p-4 border-b border-border-ghost flex items-center justify-between hover:bg-nav-bg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-nav-bg ghost-border flex items-center justify-center text-text-secondary group-hover:text-teal-accent transition-colors">
+<span class="material-symbols-outlined text-sm">domain</span>
+</div>
+<div>
+<p class="text-sm font-medium text-text-primary">PT Bintang Niaga</p>
+<p class="text-xs text-text-secondary">Indonesia • Logistics</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-data-mono text-sm text-text-primary">84</span>
+<span class="badge-low-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Low Risk</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-4 border-b border-border-ghost flex items-center justify-between hover:bg-nav-bg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-nav-bg ghost-border flex items-center justify-center text-text-secondary group-hover:text-teal-accent transition-colors">
+<span class="material-symbols-outlined text-sm">domain</span>
+</div>
+<div>
+<p class="text-sm font-medium text-text-primary">Siemens Trading</p>
+<p class="text-xs text-text-secondary">Germany • Tech</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-data-mono text-sm text-text-primary">45</span>
+<span class="badge-med-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Med Risk</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="p-4 flex items-center justify-between hover:bg-nav-bg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-nav-bg ghost-border flex items-center justify-center text-text-secondary group-hover:text-teal-accent transition-colors">
+<span class="material-symbols-outlined text-sm">domain</span>
+</div>
+<div>
+<p class="text-sm font-medium text-text-primary">Ahmed Corp</p>
+<p class="text-xs text-text-secondary">UAE • Energy</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-data-mono text-sm text-text-primary">12</span>
+<span class="badge-high-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">High Risk</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (62% ~ Col Span 7) -->
+<div class="col-span-12 lg:col-span-7 flex flex-col gap-gutter">
+<!-- Score Results Area (Bento Layout) -->
+<div class="grid grid-cols-2 gap-gutter h-full">
+<!-- Large Gauge Card (Spans full width top area) -->
+<div class="col-span-2 bg-card-bg rounded-card ghost-border flex flex-col relative overflow-hidden">
+<!-- Decorative background glow -->
+<div class="absolute top-[-50px] left-1/2 -translate-x-1/2 w-64 h-64 bg-teal-accent opacity-[0.03] rounded-full blur-3xl pointer-events-none"></div>
+<div class="p-4 border-b border-border-ghost flex justify-between items-center z-10">
+<h2 class="font-h2 text-h2 text-text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-teal-accent">speed</span>
+                                    Assessment Result
+                                </h2>
+<span class="text-xs text-text-secondary font-data-mono">ID: TNK-2023-Q4</span>
+</div>
+<div class="p-8 flex flex-col items-center justify-center flex-1 z-10">
+<!-- Gauge Visualization -->
+<div class="gauge-container mb-4">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 240 240">
+<!-- Background Track (270 degrees roughly) -->
+<circle class="gauge-track" cx="120" cy="120" r="100" stroke-dasharray="471 628" stroke-dashoffset="-78"></circle>
+<!-- Colored Progress -->
+<circle class="gauge-progress" cx="120" cy="120" r="100" stroke-dasharray="471 628" stroke-dashoffset="-78"></circle>
+</svg>
+<!-- Center Readout -->
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-data-mono text-[56px] font-bold text-white leading-none tracking-tighter">72</span>
+<span class="badge-low-risk text-[11px] font-bold px-2 py-0.5 rounded mt-2 uppercase tracking-widest">Low Risk</span>
+</div>
+</div>
+<p class="text-sm text-text-secondary text-center max-w-sm">Tanaka Trading demonstrates strong liquidity and consistent payment history within the specified parameters.</p>
+</div>
+</div>
+<!-- Metric Card 1 -->
+<div class="col-span-1 bg-card-bg rounded-card ghost-border p-4 flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-6 h-6 rounded-full bg-nav-bg ghost-border flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-teal-accent">account_balance</span>
+</div>
+<span class="font-label-xs text-label-xs text-text-secondary uppercase">Recommended Limit</span>
+</div>
+<div>
+<div class="font-data-mono text-2xl text-text-primary">$2,500,000</div>
+<div class="text-xs text-text-secondary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-[#16A34A]">trending_up</span>
+<span class="text-[#16A34A]">+15%</span> vs last year
+                                </div>
+</div>
+</div>
+<!-- Metric Card 2 -->
+<div class="col-span-1 bg-card-bg rounded-card ghost-border p-4 flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-6 h-6 rounded-full bg-nav-bg ghost-border flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-teal-accent">warning</span>
+</div>
+<span class="font-label-xs text-label-xs text-text-secondary uppercase">Default Probability</span>
+</div>
+<div>
+<div class="font-data-mono text-2xl text-text-primary">1.2%</div>
+<div class="text-xs text-text-secondary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-text-secondary">trending_flat</span>
+                                    Stable within sector
+                                </div>
+</div>
+</div>
+<!-- Risk Factors Analysis -->
+<div class="col-span-2 bg-card-bg rounded-card ghost-border flex flex-col">
+<div class="p-4 border-b border-border-ghost">
+<h3 class="font-label-xs text-label-xs text-text-secondary uppercase tracking-widest">Risk Factors Analysis</h3>
+</div>
+<div class="p-4 flex flex-col gap-5">
+<!-- Factor 1 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm font-medium text-text-primary">Payment History</span>
+<span class="font-data-mono text-xs text-text-secondary">Excellent (92/100)</span>
+</div>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill bg-[#16A34A]" style="width: 92%"></div>
+</div>
+</div>
+<!-- Factor 2 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm font-medium text-text-primary">Leverage Ratio</span>
+<span class="font-data-mono text-xs text-text-secondary">Moderate (65/100)</span>
+</div>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill bg-teal-accent" style="width: 65%"></div>
+</div>
+</div>
+<!-- Factor 3 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm font-medium text-text-primary">Market Stability</span>
+<span class="font-data-mono text-xs text-text-secondary">Good (78/100)</span>
+</div>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill bg-[#16A34A]" style="width: 78%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommendation Box -->
+<div class="col-span-2 bg-[#0891B2]/10 border border-teal-accent rounded-card p-4 flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-teal-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-teal-accent text-sm">lightbulb</span>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-text-primary mb-1">System Recommendation: Approve Standard Terms</h4>
+<p class="text-sm text-text-secondary leading-relaxed">Based on the composite score of 72, standard Net-30 payment terms are recommended up to the $2.5M limit. No additional collateral required for current transaction volume.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Initialization Scripts -->
+<script>
+        // Micro-interaction for gauge animation on load
+        document.addEventListener("DOMContentLoaded", () => {
+            const gaugeProgress = document.querySelector('.gauge-progress');
+            if(gaugeProgress) {
+                // Animate to ~72% of the arc. 
+                // Full dasharray is roughly 628 (2 * pi * 100). Arc is 270 deg (about 3/4 circle = ~471 length).
+                // 72% of 471 is ~339. Offset = 471 - 339 = 132.
+                setTimeout(() => {
+                    gaugeProgress.style.strokeDashoffset = '132';
+                }, 100);
+            }
+        });
+    </script>
+</body></html>

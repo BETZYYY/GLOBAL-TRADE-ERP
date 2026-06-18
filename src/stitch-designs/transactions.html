@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GlobalTrade ERP - Payment Transactions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#27354d",
+                        "on-tertiary-fixed": "#00201d",
+                        "on-tertiary": "#003732",
+                        "surface": "#04132a",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233148",
+                        "secondary": "#4cd7f6",
+                        "inverse-surface": "#d6e3ff",
+                        "surface-container-low": "#0d1c32",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-dim": "#04132a",
+                        "on-secondary-fixed": "#001f26",
+                        "error-container": "#93000a",
+                        "surface-container": "#112036",
+                        "outline": "#879298",
+                        "secondary-container": "#03b5d3",
+                        "on-primary-container": "#002e3b",
+                        "surface-bright": "#2c3952",
+                        "on-background": "#d6e3ff",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "primary": "#6cd3f7",
+                        "on-secondary": "#003640",
+                        "tertiary": "#6bd8cb",
+                        "inverse-primary": "#006780",
+                        "on-primary": "#003543",
+                        "on-tertiary-container": "#00302b",
+                        "on-primary-fixed": "#001f28",
+                        "surface-tint": "#6cd3f7",
+                        "surface-container-high": "#1c2a41",
+                        "on-surface": "#d6e3ff",
+                        "tertiary-fixed": "#89f5e7",
+                        "secondary-fixed": "#acedff",
+                        "on-secondary-container": "#00424e",
+                        "on-surface-variant": "#bdc8ce",
+                        "surface-variant": "#27354d",
+                        "tertiary-container": "#29a195",
+                        "primary-fixed": "#b7eaff",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010e24",
+                        "background": "#04132a",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#004e61",
+                        "primary-container": "#269dbe",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "outline-variant": "#3e484d",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "brand-midnight-base": "#0F1B2D",
+                        "brand-midnight-card": "#16243B",
+                        "brand-midnight-border": "#1E3A5F",
+                        "brand-teal": "#0891B2",
+                        "brand-high-risk-bg": "rgba(220, 38, 38, 0.2)",
+                        "brand-high-risk-text": "#DC2626",
+                        "brand-success-bg": "rgba(22, 163, 74, 0.2)",
+                        "brand-success-text": "#22C55E",
+                        "brand-table-header-bg": "#1E2D44",
+                        "brand-table-header-text": "#94A3B8",
+                        "brand-table-row-alt": "#192E48"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar_width_collapsed": "56px",
+                        "gutter": "16px",
+                        "container_padding": "24px",
+                        "sidebar_width_expanded": "240px",
+                        "row_height_table": "40px",
+                        "button_height": "40px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono", "monospace"],
+                        "body": ["Inter", "sans-serif"],
+                        "h1": ["Inter", "sans-serif"],
+                        "label-xs": ["Inter", "sans-serif"],
+                        "h3-caps": ["Inter", "sans-serif"],
+                        "h2": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-xs": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "h3-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "h2": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0F1B2D; color: #d6e3ff; }
+        .ghost-border { border: 1px solid #1E3A5F; }
+        .teal-border { border: 1px solid #0891B2; }
+        .teal-focus:focus-within { border-color: #0891B2; box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2); }
+        .table-row-alt:nth-child(even) { background-color: #192E48; }
+        
+        /* Custom Scrollbar for dense data tables */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0F1B2D; }
+        ::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0891B2; }
+    </style>
+</head>
+<body class="font-body text-body bg-brand-midnight-base min-h-screen flex antialiased">
+<!-- SideNavBar Component -->
+<nav class="w-sidebar_width_collapsed hover:w-sidebar_width_expanded transition-all duration-300 h-screen fixed left-0 top-0 border-r border-outline-variant dark:border-outline-variant bg-surface-container-low flex flex-col items-center py-4 z-50 group overflow-hidden">
+<div class="flex items-center w-full px-4 mb-8">
+<div class="w-8 h-8 rounded-full bg-brand-teal flex-shrink-0 flex items-center justify-center font-h3-caps text-h3-caps text-white font-bold">GT</div>
+<div class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+<div class="font-h1 text-h1 text-primary dark:text-primary tracking-tighter">GLOBALTRADE</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant">ERP</div>
+</div>
+</div>
+<div class="w-full flex flex-col space-y-2 px-2">
+<!-- Dashboard -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="dashboard">dashboard</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Dashboard</span>
+</a>
+<!-- Transactions (ACTIVE) -->
+<a class="flex items-center w-full px-2 py-3 rounded text-secondary dark:text-secondary border-l-2 border-secondary font-bold bg-secondary-container/10 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="receipt_long">receipt_long</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Transactions</span>
+</a>
+<!-- Hedging -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Hedging</span>
+</a>
+<!-- Payment Terms -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="payments">payments</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Payment Terms</span>
+</a>
+<!-- Currency Basket -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="currency_exchange">currency_exchange</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Currency Basket</span>
+</a>
+<!-- Credit Risk -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="speed">speed</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Credit Risk</span>
+</a>
+<!-- Crypto Settlement -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="currency_bitcoin">currency_bitcoin</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Crypto Settlement</span>
+</a>
+<!-- Reports -->
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0" data-icon="assessment">assessment</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Reports</span>
+</a>
+</div>
+<div class="mt-auto px-2 w-full">
+<a class="flex items-center w-full px-2 py-3 rounded text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest hover:text-primary transition-all duration-200 ease-in-out" href="#">
+<img alt="Finance Manager Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover flex-shrink-0" data-alt="A sleek, modern corporate portrait of a financial risk manager in low-key studio lighting with teal rim light, conveying institutional authority and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANp2GXvqluu45rSOmuHB3_uwZft6WVmRI0SPFgCRi2hgvlSZbALbzmOpA5nLZDVDWM-PFI8nPyw46smLOmzZNj2ebCyxFGbgXkotv-Y-hDZTm5lPCwQniZ_CVW3-IgsSddC2-77v-xwiHjkBx7wt_0i9KlvSNP5i0ic0z1rYmULISjmtxYUNcK3EXuF8OUHhtY5-ZQNTF8JG49rU7CUCBr2w_uGKgWtnOckhG3CKoyyC7i4UgxMHb2hBLeNZmWKjoM2PugekfzePQ"/>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">S. Miller</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-sidebar_width_collapsed flex-1 flex flex-col min-h-screen relative w-[calc(100%-56px)]">
+<!-- TopNavBar Component -->
+<header class="h-14 fixed top-0 right-0 left-sidebar_width_collapsed w-[calc(100%-56px)] border-b border-outline-variant dark:border-outline-variant bg-surface-container dark:bg-surface-container flex justify-between items-center px-gutter z-40">
+<div class="flex items-center">
+<span class="font-body text-body text-on-surface-variant">Transactions / <span class="text-primary font-semibold">Payment Transactions</span></span>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 p-2 rounded-full hover:bg-surface-variant/50">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-4 max-w-full">
+<!-- Page Header & Actions -->
+<div class="flex justify-between items-center w-full">
+<div>
+<h1 class="font-h1 text-h1 text-on-surface m-0">Payment Transactions</h1>
+</div>
+<div>
+<button class="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        New Transaction
+                    </button>
+</div>
+</div>
+<!-- Filter Bar Card -->
+<div class="bg-brand-midnight-card ghost-border rounded-xl p-4 flex flex-wrap gap-4 items-end">
+<div class="flex-1 min-w-[200px]">
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Search</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] mr-2">search</span>
+<input class="bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0" placeholder="TXN ID, Reference..." type="text"/>
+</div>
+</div>
+<div class="w-32">
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Status</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
+<select class="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+<option>All Status</option>
+<option>Pending</option>
+<option>Settled</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="w-32">
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Risk Level</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
+<select class="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+<option>All Risk</option>
+<option>High</option>
+<option>Low</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="w-32">
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Currency</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
+<select class="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+<option>All Pairs</option>
+<option>USD/IDR</option>
+<option>EUR/IDR</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="w-48">
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Date Range</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px] mr-2">calendar_today</span>
+<input class="bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0" type="text" value="Oct 1 - Oct 31"/>
+</div>
+</div>
+<button class="h-8 px-3 rounded ghost-border text-on-surface-variant hover:text-white hover:bg-surface-variant/50 transition-colors font-label-xs text-label-xs flex items-center cursor-pointer">
+                    Clear
+                </button>
+</div>
+<!-- Data Table Card -->
+<div class="bg-brand-midnight-card ghost-border rounded-xl flex-1 flex flex-col overflow-hidden min-h-[400px]">
+<div class="px-4 py-3 border-b border-brand-midnight-border flex justify-between items-center">
+<h2 class="font-h2 text-h2 text-on-surface m-0">Recent Transactions</h2>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Showing 8 records</span>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse whitespace-nowrap">
+<thead class="bg-brand-table-header-bg sticky top-0 z-10 ghost-border">
+<tr>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">#</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Reference</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Pair</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase text-right">Amount</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase text-right">IDR Exposure</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Risk Score</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Level</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Method</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Status</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase">Date</th>
+<th class="font-h3-caps text-h3-caps text-brand-table-header-text py-2 px-4 uppercase text-center">Action</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono">
+<!-- Row 1: High Risk -->
+<tr class="table-row-alt hover:bg-surface-variant/30 transition-colors ghost-border border-l-2 border-l-[#DC2626]">
+<td class="py-2 px-4 text-on-surface-variant">1</td>
+<td class="py-2 px-4 text-white">TRX-2026-0042</td>
+<td class="py-2 px-4 text-on-surface-variant">USD/IDR</td>
+<td class="py-2 px-4 text-white text-right">1,250,000.00</td>
+<td class="py-2 px-4 text-primary text-right">19,687,500,000</td>
+<td class="py-2 px-4">
+<div class="w-[80px] h-1.5 bg-brand-midnight-base rounded-full overflow-hidden">
+<div class="h-full bg-[#DC2626] w-[85%]"></div>
+</div>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(220,38,38,0.2)] text-[#DC2626] border border-[#DC2626]">HIGH</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container-highest border border-outline-variant text-on-surface">SWIFT</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#B45309]/20 text-[#F59E0B] border border-[#F59E0B]">PENDING</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">2026-10-15</td>
+<td class="py-2 px-4 text-center">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-variant/30 transition-colors ghost-border">
+<td class="py-2 px-4 text-on-surface-variant">2</td>
+<td class="py-2 px-4 text-white">TRX-2026-0041</td>
+<td class="py-2 px-4 text-on-surface-variant">EUR/IDR</td>
+<td class="py-2 px-4 text-white text-right">450,000.00</td>
+<td class="py-2 px-4 text-primary text-right">7,515,000,000</td>
+<td class="py-2 px-4">
+<div class="w-[80px] h-1.5 bg-brand-midnight-base rounded-full overflow-hidden">
+<div class="h-full bg-[#F59E0B] w-[45%]"></div>
+</div>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#B45309]/20 text-[#F59E0B] border border-[#F59E0B]">MED</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container-highest border border-outline-variant text-on-surface">SEPA</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">SETTLED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">2026-10-14</td>
+<td class="py-2 px-4 text-center">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="table-row-alt hover:bg-surface-variant/30 transition-colors ghost-border border-l-2 border-l-[#22C55E]">
+<td class="py-2 px-4 text-on-surface-variant">3</td>
+<td class="py-2 px-4 text-white">TRX-2026-0040</td>
+<td class="py-2 px-4 text-on-surface-variant">SGD/IDR</td>
+<td class="py-2 px-4 text-white text-right">85,000.00</td>
+<td class="py-2 px-4 text-primary text-right">981,750,000</td>
+<td class="py-2 px-4">
+<div class="w-[80px] h-1.5 bg-brand-midnight-base rounded-full overflow-hidden">
+<div class="h-full bg-[#22C55E] w-[15%]"></div>
+</div>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">LOW</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container-highest border border-outline-variant text-on-surface">SWIFT</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">SETTLED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">2026-10-14</td>
+<td class="py-2 px-4 text-center">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-variant/30 transition-colors ghost-border">
+<td class="py-2 px-4 text-on-surface-variant">4</td>
+<td class="py-2 px-4 text-white">TRX-2026-0039</td>
+<td class="py-2 px-4 text-on-surface-variant">USD/IDR</td>
+<td class="py-2 px-4 text-white text-right">320,000.00</td>
+<td class="py-2 px-4 text-primary text-right">5,040,000,000</td>
+<td class="py-2 px-4">
+<div class="w-[80px] h-1.5 bg-brand-midnight-base rounded-full overflow-hidden">
+<div class="h-full bg-[#F59E0B] w-[50%]"></div>
+</div>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#B45309]/20 text-[#F59E0B] border border-[#F59E0B]">MED</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container-highest border border-outline-variant text-on-surface">CRYPTO</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">SETTLED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">2026-10-13</td>
+<td class="py-2 px-4 text-center">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="table-row-alt hover:bg-surface-variant/30 transition-colors ghost-border border-l-2 border-l-[#22C55E]">
+<td class="py-2 px-4 text-on-surface-variant">5</td>
+<td class="py-2 px-4 text-white">TRX-2026-0038</td>
+<td class="py-2 px-4 text-on-surface-variant">JPY/IDR</td>
+<td class="py-2 px-4 text-white text-right">15,000,000.00</td>
+<td class="py-2 px-4 text-primary text-right">1,575,000,000</td>
+<td class="py-2 px-4">
+<div class="w-[80px] h-1.5 bg-brand-midnight-base rounded-full overflow-hidden">
+<div class="h-full bg-[#22C55E] w-[20%]"></div>
+</div>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">LOW</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-surface-container-highest border border-outline-variant text-on-surface">SWIFT</span>
+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A]">SETTLED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">2026-10-12</td>
+<td class="py-2 px-4 text-center">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Side Drawer: New Transaction (Open State) -->
+<!-- Drawer Overlay -->
+<div class="fixed inset-0 bg-black/50 z-50 transition-opacity"></div>
+<!-- Drawer Panel -->
+<div class="fixed inset-y-0 right-0 w-[480px] bg-brand-midnight-base border-l border-brand-midnight-border shadow-2xl z-50 flex flex-col transform transition-transform duration-300 translate-x-0">
+<!-- Drawer Header -->
+<div class="h-14 border-b border-brand-midnight-border px-6 flex justify-between items-center bg-brand-midnight-card shrink-0">
+<h2 class="font-h2 text-h2 text-on-surface m-0">New Transaction</h2>
+<button class="text-on-surface-variant hover:text-white cursor-pointer transition-colors p-1 rounded hover:bg-surface-variant">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Drawer Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<!-- Exposure Preview Card (High-end UI element) -->
+<div class="bg-gradient-to-br from-[#16243B] to-[#0F1B2D] p-5 rounded-xl border border-[#1E3A5F] shadow-lg relative overflow-hidden">
+<!-- Abstract background pattern -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-[#0891B2] opacity-5 rounded-full blur-2xl"></div>
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant mb-4 uppercase">Exposure Preview (IDR Equivalent)</h3>
+<div class="flex items-end justify-between mb-2">
+<div class="font-data-mono text-[32px] font-bold text-white leading-none tracking-tight">Rp 0.00</div>
+<div class="text-right">
+<div class="font-label-xs text-label-xs text-on-surface-variant">Est. Rate</div>
+<div class="font-data-mono text-data-mono text-primary">15,750.00</div>
+</div>
+</div>
+<div class="w-full bg-brand-midnight-base h-1.5 rounded-full mt-4 overflow-hidden border border-[#1E3A5F]">
+<div class="h-full bg-surface-variant w-[5%] transition-all duration-500"></div>
+</div>
+<div class="flex justify-between mt-1">
+<span class="font-label-xs text-label-xs text-on-surface-variant">Risk Limit Utilized</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">0%</span>
+</div>
+</div>
+<!-- Transaction Details Form -->
+<div class="space-y-5">
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant border-b border-[#1E3A5F] pb-2 uppercase">Transaction Details</h3>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1">Currency Pair</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-10 flex items-center px-3 cursor-pointer">
+<select class="appearance-none bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0 cursor-pointer">
+<option>Select Pair</option>
+<option>USD/IDR</option>
+<option>EUR/IDR</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1">Amount</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-10 flex items-center px-3">
+<input class="bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0 text-right" placeholder="0.00" type="text"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1">Value Date</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-10 flex items-center px-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">calendar_today</span>
+<input class="bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0 [color-scheme:dark]" type="date"/>
+</div>
+</div>
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1">Counterparty Partner</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base h-10 flex items-center px-3 cursor-pointer">
+<select class="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+<option>Select Partner</option>
+<option>Global Bank Corp</option>
+<option>Tech Vendors Inc</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-2">Settlement Method</label>
+<div class="flex gap-2">
+<label class="flex-1 cursor-pointer">
+<input checked="" class="peer sr-only" name="method" type="radio"/>
+<div class="px-3 py-2 text-center rounded ghost-border bg-brand-midnight-base text-on-surface-variant font-label-xs text-label-xs peer-checked:border-brand-teal peer-checked:bg-[rgba(8,145,178,0.1)] peer-checked:text-white transition-all">SWIFT</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="peer sr-only" name="method" type="radio"/>
+<div class="px-3 py-2 text-center rounded ghost-border bg-brand-midnight-base text-on-surface-variant font-label-xs text-label-xs peer-checked:border-brand-teal peer-checked:bg-[rgba(8,145,178,0.1)] peer-checked:text-white transition-all">SEPA</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="peer sr-only" name="method" type="radio"/>
+<div class="px-3 py-2 text-center rounded ghost-border bg-brand-midnight-base text-on-surface-variant font-label-xs text-label-xs peer-checked:border-brand-teal peer-checked:bg-[rgba(8,145,178,0.1)] peer-checked:text-white transition-all">CRYPTO</div>
+</label>
+</div>
+</div>
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant mb-1">Notes / Purpose</label>
+<div class="relative teal-focus ghost-border rounded bg-brand-midnight-base flex items-start p-3">
+<textarea class="bg-transparent border-none outline-none text-white font-body text-body w-full p-0 focus:ring-0 resize-none" placeholder="Enter transaction details or compliance notes..." rows="3"></textarea>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-6 border-t border-brand-midnight-border bg-brand-midnight-card shrink-0 flex gap-3 justify-end">
+<button class="h-button_height px-6 rounded-lg font-label-xs text-label-xs text-brand-teal border border-brand-teal bg-transparent hover:bg-[rgba(8,145,178,0.1)] transition-colors cursor-pointer">
+                Cancel
+            </button>
+<button class="h-button_height px-6 rounded-lg font-label-xs text-label-xs text-white bg-brand-teal hover:bg-[#067A96] transition-colors cursor-pointer shadow-[0_0_15px_rgba(8,145,178,0.3)]">
+                Submit Transaction
+            </button>
+</div>
+</div>
+</body></html>

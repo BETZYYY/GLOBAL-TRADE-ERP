@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Risk Assessment Detail - TRX-2026-0042</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#003732",
+                        "on-primary-container": "#002e3b",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "tertiary-container": "#29a195",
+                        "surface-variant": "#27354d",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#d6e3ff",
+                        "inverse-on-surface": "#233148",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "outline-variant": "#3e484d",
+                        "secondary-container": "#03b5d3",
+                        "secondary": "#4cd7f6",
+                        "primary": "#6cd3f7",
+                        "surface-container-highest": "#27354d",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#006780",
+                        "on-primary": "#003543",
+                        "on-surface": "#d6e3ff",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-lowest": "#010e24",
+                        "surface-dim": "#04132a",
+                        "on-tertiary-fixed": "#00201d",
+                        "on-secondary-container": "#00424e",
+                        "primary-container": "#269dbe",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "surface-tint": "#6cd3f7",
+                        "surface": "#04132a",
+                        "on-secondary": "#003640",
+                        "on-primary-fixed-variant": "#004e61",
+                        "inverse-surface": "#d6e3ff",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#0d1c32",
+                        "surface-container": "#112036",
+                        "on-surface-variant": "#bdc8ce",
+                        "tertiary-fixed": "#89f5e7",
+                        "outline": "#879298",
+                        "surface-bright": "#2c3952",
+                        "background": "#04132a",
+                        "primary-fixed": "#b7eaff",
+                        "surface-container-high": "#1c2a41",
+                        "on-tertiary-container": "#00302b",
+                        "secondary-fixed": "#acedff",
+                        "on-primary-fixed": "#001f28",
+                        "tertiary": "#6bd8cb",
+                        // Custom Brand Colors based on Style Guidance
+                        "brand-bg": "#0F1B2D",
+                        "brand-card": "#16243B",
+                        "brand-border": "#1E3A5F",
+                        "brand-primary": "#0891B2",
+                        "brand-danger": "#DC2626",
+                        "brand-warning": "#D97706",
+                        "brand-success": "#0D9488",
+                        "brand-danger-bg": "rgba(220, 38, 38, 0.2)",
+                        "brand-success-bg": "rgba(22, 163, 74, 0.2)"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "sidebar_width_collapsed": "56px",
+                        "sidebar_width_expanded": "240px",
+                        "container_padding": "24px",
+                        "gutter": "16px",
+                        "button_height": "40px",
+                        "row_height_table": "40px"
+                    },
+                    fontFamily: {
+                        "data-mono": ["JetBrains Mono"],
+                        "h3-caps": ["Inter"],
+                        "h2": ["Inter"],
+                        "h1": ["Inter"],
+                        "body": ["Inter"],
+                        "label-xs": ["Inter"]
+                    },
+                    fontSize: {
+                        "data-mono": ["13px", { lineHeight: "18px", fontWeight: "500" }],
+                        "h3-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "h2": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+                        "h1": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "body": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "label-xs": ["11px", { lineHeight: "14px", fontWeight: "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom utilities based on guidelines */
+        .card-border { border: 1px solid theme('colors.brand-border'); }
+        .focus-glow:focus { border-color: theme('colors.brand-primary'); box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.3); outline: none; }
+        
+        /* Stepper Animation */
+        @keyframes spin-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+
+        /* Gauge Needle Animation */
+        @keyframes needle-swing {
+            0% { transform: rotate(-90deg); }
+            100% { transform: rotate(50deg); /* Roughly 78 on a -90 to +90 scale */ }
+        }
+        .gauge-needle {
+            transform-origin: bottom center;
+            animation: needle-swing 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-on-surface font-body overflow-x-hidden selection:bg-brand-primary selection:text-white">
+<!-- JSON Component: SideNavBar -->
+<nav aria-label="Sidebar Navigation" class="bg-surface fixed left-0 top-0 h-screen w-sidebar_width_collapsed hover:w-sidebar_width_expanded transition-all duration-300 z-50 border-r border-outline-variant flex flex-col py-4 group">
+<!-- Logo Area -->
+<div class="flex items-center px-4 mb-8 whitespace-nowrap overflow-hidden">
+<div class="flex-shrink-0 w-6 h-6 bg-primary rounded-sm flex items-center justify-center mr-3 font-bold text-on-primary text-xs">TR</div>
+<span class="font-h2 text-h2 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">Treasury ERP</span>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 flex flex-col gap-1 px-2">
+<!-- Inactive -->
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Dashboard</span>
+</a>
+<!-- Active (Transactions) -->
+<a class="flex items-center px-2 py-2 rounded-lg text-primary border-l-2 border-primary bg-secondary-container/10 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap font-medium">Transactions</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">timeline</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Hedging</span>
+</a>
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">payments</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Payment Terms</span>
+</a>
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">currency_exchange</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Currency Basket</span>
+</a>
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">account_balance</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Credit Risk</span>
+</a>
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">currency_bitcoin</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Crypto Settlement</span>
+</a>
+<a class="flex items-center px-2 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined flex-shrink-0 text-[20px]" style="font-variation-settings: 'FILL' 0;">assessment</span>
+<span class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Reports</span>
+</a>
+</div>
+</nav>
+<!-- JSON Component: TopNavBar -->
+<header class="bg-surface-dim fixed top-0 right-0 w-[calc(100%-56px)] h-[56px] z-40 border-b border-outline-variant flex justify-between items-center px-gutter transition-all duration-300 ml-14">
+<!-- Breadcrumb / Title Area -->
+<div class="flex flex-col justify-center">
+<div class="text-on-surface-variant font-label-xs text-label-xs flex items-center gap-1">
+<span class="hover:text-primary cursor-pointer transition-colors">Dashboard</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Transactions</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary">TRX-2026-0042</span>
+</div>
+<h1 class="font-h2 text-h2 text-on-surface">Risk Assessment Detail</h1>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 p-1 rounded-full hover:bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 p-1 rounded-full hover:bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-brand-border cursor-pointer">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot portrait of an executive in a dark corporate setting with subtle teal lighting accents, highly detailed, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFFB6uNXLkylOVUDFVNArpEezrMAvwWeILmx4tYlECOGJ0RCO8-fot5B0Fo3Y_fQ-GtH_EGb8o5AZPsfeUvAtmYz5RG_vtPWMbQQS7JydTPl7VY1QWHwhXYfVCM_BFWEKPxBJAPAzbzxFFOHYAewmvxU4FeVPsZoJvwxz-uYjM23CHoQBlvXnqUo68_YuPvInhgD1k2zptPbUnP3MVSMNSfxqn4OV3fb_DJUVNsJig7eCxPSJy7W9Ku8XH9RB3Ren5NPGBf96xY5s"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[56px] mt-[56px] p-container_padding min-h-[calc(100vh-56px)] grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+<!-- Left Column: 28% (~3.36 cols, round to 3 or 4. Let's use 3 for left, 5 for center, 4 for right for better balance, or strictly 3/5/4 approx 25/42/33. Close enough to 28/44/28) -->
+<div class="md:col-span-3 flex flex-col gap-6">
+<!-- Transaction Details Card -->
+<div class="bg-brand-card rounded-xl card-border p-5 relative overflow-hidden group">
+<!-- Subtle Top Gradient -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-primary to-transparent opacity-50"></div>
+<h2 class="font-h3-caps text-h3-caps text-outline uppercase border-b border-brand-border pb-2 mb-4">Transaction Details</h2>
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase">Reference</span>
+<span class="font-data-mono text-data-mono text-brand-primary font-bold">TRX-2026-0042</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase">Pair</span>
+<div class="flex items-center gap-2 bg-surface-container-high px-2 py-1 rounded border border-brand-border">
+<span class="font-data-mono text-data-mono text-on-surface font-bold">USD</span>
+<span class="material-symbols-outlined text-[14px] text-outline">arrow_right_alt</span>
+<span class="font-data-mono text-data-mono text-on-surface font-bold">IDR</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 bg-brand-bg rounded border border-brand-border p-3">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase mb-1">Amount</span>
+<span class="font-data-mono text-data-mono text-[18px] text-on-surface font-bold text-right">$250,000.00</span>
+<div class="h-[1px] w-full bg-brand-border my-1"></div>
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase mb-1">Exposure</span>
+<span class="font-data-mono text-data-mono text-[16px] text-brand-danger font-bold text-right">Rp 3.93B</span>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase">Settlement</span>
+<span class="font-data-mono text-data-mono text-on-surface">Jul 15, 2026</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase">Method</span>
+<span class="bg-surface-container px-2 py-1 rounded text-xs font-bold border border-brand-border text-brand-primary">SWIFT</span>
+</div>
+<div class="flex justify-between items-center border-t border-brand-border pt-4 mt-2">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase">Submitted By</span>
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-brand-primary text-[10px] flex items-center justify-center font-bold text-white">BS</div>
+<span class="font-body text-body text-on-surface">Budi Santoso</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Approval Flow Card -->
+<div class="bg-brand-card rounded-xl card-border p-5">
+<h2 class="font-h3-caps text-h3-caps text-outline uppercase border-b border-brand-border pb-2 mb-6">Approval Flow</h2>
+<div class="flex justify-between items-center relative px-2">
+<!-- Connecting Lines -->
+<div class="absolute top-1/2 left-4 right-4 h-[2px] bg-brand-border -translate-y-1/2 z-0"></div>
+<div class="absolute top-1/2 left-4 w-1/2 h-[2px] bg-brand-primary -translate-y-1/2 z-0"></div>
+<!-- Step 1: Submitted -->
+<div class="flex flex-col items-center gap-2 z-10 relative bg-brand-card w-12 text-center">
+<div class="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center border-2 border-brand-card shadow-[0_0_8px_rgba(8,145,178,0.5)]">
+<span class="material-symbols-outlined text-[14px] text-white font-bold" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface whitespace-nowrap">Submitted</span>
+</div>
+<!-- Step 2: Risk Review (Active) -->
+<div class="flex flex-col items-center gap-2 z-10 relative bg-brand-card w-12 text-center">
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center border-2 border-brand-primary relative">
+<span class="material-symbols-outlined text-[14px] text-brand-primary animate-spin-slow">sync</span>
+</div>
+<span class="font-label-xs text-label-xs text-brand-primary font-bold whitespace-nowrap">Risk Review</span>
+</div>
+<!-- Step 3: Final Approval -->
+<div class="flex flex-col items-center gap-2 z-10 relative bg-brand-card w-12 text-center">
+<div class="w-6 h-6 rounded-full bg-brand-bg flex items-center justify-center border-2 border-brand-border">
+<span class="material-symbols-outlined text-[14px] text-outline">lock</span>
+</div>
+<span class="font-label-xs text-label-xs text-outline whitespace-nowrap">Final Approval</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Center Column: 44% (~5 cols) -->
+<div class="md:col-span-5 flex flex-col gap-6">
+<!-- Risk Assessment Hero Card -->
+<div class="bg-brand-card rounded-xl card-border p-6 flex flex-col items-center relative overflow-hidden">
+<!-- Subtle background mesh/shader effect placeholder -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+
+</div>
+<div class="w-full flex justify-between items-center mb-8 relative z-10">
+<h2 class="font-h3-caps text-h3-caps text-on-surface uppercase tracking-widest">Volatility Risk Meter</h2>
+<span class="px-2 py-1 bg-[rgba(220,38,38,0.2)] border border-brand-danger text-brand-danger text-[10px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">warning</span> HIGH RISK
+                    </span>
+</div>
+<!-- Gauge Container (CSS roughly creating a semicircle gauge) -->
+<div class="relative w-[240px] h-[120px] mb-8 overflow-hidden z-10">
+<!-- Gauge Background Semicircle -->
+<div class="absolute top-0 left-0 w-[240px] h-[240px] rounded-full border-[16px] border-brand-border border-t-transparent border-r-transparent transform -rotate-45 box-border"></div>
+<!-- Colored Segments (Overlapping absolute SVG/divs would be ideal, but we'll use a conic-gradient trick wrapped in a clip) -->
+<div class="absolute top-0 left-0 w-full h-[240px] rounded-full box-border" style="background: conic-gradient(from 270deg, #0D9488 0deg 60deg, #D97706 60deg 120deg, #DC2626 120deg 180deg, transparent 180deg); 
+                                mask-image: radial-gradient(transparent 58%, black 60%);
+                                -webkit-mask-image: radial-gradient(transparent 58%, black 60%);">
+</div>
+<!-- Gauge Needle -->
+<div class="absolute bottom-0 left-1/2 w-1 h-[100px] -ml-[2px] z-20 gauge-needle flex flex-col justify-start items-center">
+<div class="w-3 h-3 bg-white rounded-full absolute -top-1 shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+<div class="w-1 h-full bg-gradient-to-b from-white to-transparent"></div>
+</div>
+<!-- Needle Pivot point -->
+<div class="absolute bottom-[-8px] left-1/2 w-4 h-4 bg-brand-bg border-2 border-brand-primary rounded-full -ml-[8px] z-30"></div>
+<!-- Labels for Gauge -->
+<div class="absolute bottom-2 left-2 text-[10px] font-bold text-brand-success font-data-mono">LOW</div>
+<div class="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] font-bold text-brand-warning font-data-mono">MED</div>
+<div class="absolute bottom-2 right-2 text-[10px] font-bold text-brand-danger font-data-mono">HIGH</div>
+</div>
+<!-- Score Display -->
+<div class="flex flex-col items-center mb-8 z-10 relative">
+<span class="font-data-mono text-[48px] leading-none text-white font-bold drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">78</span>
+<span class="text-on-surface-variant font-label-xs text-label-xs mt-1 uppercase tracking-widest">Risk Score</span>
+</div>
+<!-- Stat Cards Below Gauge -->
+<div class="w-full grid grid-cols-2 gap-4 mb-8 z-10 relative">
+<div class="bg-brand-bg border border-brand-border rounded-lg p-4 flex flex-col">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase mb-2">Value at Risk (VaR)</span>
+<span class="font-data-mono text-data-mono text-[16px] text-on-surface font-bold">Rp 196.8M</span>
+</div>
+<div class="bg-brand-bg border border-brand-border rounded-lg p-4 flex flex-col">
+<span class="text-on-surface-variant font-label-xs text-label-xs uppercase mb-2">Volatility 30d</span>
+<div class="flex items-center gap-2">
+<span class="font-data-mono text-data-mono text-[16px] text-brand-danger font-bold">3.42%</span>
+<span class="material-symbols-outlined text-[16px] text-brand-danger">trending_up</span>
+</div>
+</div>
+</div>
+<!-- Mitigation Options -->
+<div class="w-full flex flex-col gap-3 z-10 relative">
+<h3 class="font-label-xs text-label-xs text-outline uppercase border-b border-brand-border pb-1 mb-2">Recommended Mitigations</h3>
+<button class="w-full h-button_height bg-brand-primary text-white rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[#06b6d4] transition-colors focus-glow">
+<span class="material-symbols-outlined text-[18px]">security</span>
+                        Apply Forward Contract
+                    </button>
+<button class="w-full h-button_height bg-transparent border border-brand-primary text-brand-primary rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[rgba(8,145,178,0.1)] transition-colors focus-glow">
+<span class="material-symbols-outlined text-[18px]">show_chart</span>
+                        Buy Currency Option
+                    </button>
+</div>
+</div>
+</div>
+<!-- Right Column: 28% (~4 cols) -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<!-- Risk Factors Card (Bento Style Sub-component) -->
+<div class="bg-brand-card rounded-xl card-border p-5">
+<h2 class="font-h3-caps text-h3-caps text-outline uppercase border-b border-brand-border pb-2 mb-5">Risk Factors</h2>
+<div class="flex flex-col gap-5">
+<!-- Factor 1 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="font-body text-[13px] text-on-surface font-medium">Currency Volatility</span>
+<span class="font-data-mono text-[12px] text-brand-danger font-bold">85/100</span>
+</div>
+<div class="w-full h-[6px] bg-brand-bg rounded-full overflow-hidden border border-brand-border">
+<div class="h-full bg-brand-danger w-[85%] relative">
+<div class="absolute inset-0 bg-white opacity-20 w-1/2"></div> <!-- Subtle gloss -->
+</div>
+</div>
+</div>
+<!-- Factor 2 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="font-body text-[13px] text-on-surface font-medium">Exposure Size</span>
+<span class="font-data-mono text-[12px] text-brand-warning font-bold">70/100</span>
+</div>
+<div class="w-full h-[6px] bg-brand-bg rounded-full overflow-hidden border border-brand-border">
+<div class="h-full bg-brand-warning w-[70%]"></div>
+</div>
+</div>
+<!-- Factor 3 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="font-body text-[13px] text-on-surface font-medium">Settlement Tenor</span>
+<span class="font-data-mono text-[12px] text-brand-warning font-bold">60/100</span>
+</div>
+<div class="w-full h-[6px] bg-brand-bg rounded-full overflow-hidden border border-brand-border">
+<div class="h-full bg-brand-warning w-[60%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Log Card -->
+<div class="bg-brand-card rounded-xl card-border p-5 flex-1 overflow-hidden flex flex-col">
+<h2 class="font-h3-caps text-h3-caps text-outline uppercase border-b border-brand-border pb-2 mb-5 flex justify-between items-center">
+                    Activity Log
+                    <span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-white transition-colors">filter_list</span>
+</h2>
+<div class="flex-1 overflow-y-auto pr-2 custom-scrollbar relative pl-2">
+<!-- Vertical Timeline Line -->
+<div class="absolute left-[13px] top-2 bottom-2 w-[1px] bg-brand-border z-0"></div>
+<div class="flex flex-col gap-6 relative z-10 pb-4">
+<!-- Entry 1 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-brand-danger mt-1 flex-shrink-0 shadow-[0_0_5px_rgba(220,38,38,0.8)] outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">10:42 AM Today</span>
+<span class="font-body text-[13px] text-on-surface">Risk analyst flagged high IDR volatility against USD benchmark.</span>
+<span class="text-[11px] text-brand-primary hover:underline cursor-pointer">View Report</span>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-brand-primary mt-1 flex-shrink-0 outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">09:15 AM Today</span>
+<span class="font-body text-[13px] text-on-surface">FM review started. Assigned to Sarah Jenkins.</span>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-brand-warning mt-1 flex-shrink-0 outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">08:02 AM Today</span>
+<span class="font-body text-[13px] text-on-surface">System alert: Exposure breach threshold approach (95%).</span>
+</div>
+</div>
+<!-- Entry 4 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-brand-success mt-1 flex-shrink-0 outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">Yesterday, 16:30</span>
+<span class="font-body text-[13px] text-on-surface">Compliance pre-check passed automatically.</span>
+</div>
+</div>
+<!-- Entry 5 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-outline mt-1 flex-shrink-0 outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">Yesterday, 15:00</span>
+<span class="font-body text-[13px] text-on-surface">Transaction created by Budi Santoso via API ingress.</span>
+</div>
+</div>
+<!-- Entry 6 -->
+<div class="flex gap-4 items-start">
+<div class="w-3 h-3 rounded-full bg-outline mt-1 flex-shrink-0 outline outline-4 outline-brand-card"></div>
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-[11px] text-outline">Yesterday, 14:59</span>
+<span class="font-body text-[13px] text-on-surface">Quote requested via SWIFT network.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

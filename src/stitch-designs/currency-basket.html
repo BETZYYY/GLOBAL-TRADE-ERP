@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Currency Basket - Treasury Risk Manager</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config from Guidance -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#2c3952",
+                        "surface-container": "#112036",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "on-tertiary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#004e61",
+                        "tertiary-fixed": "#89f5e7",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "inverse-surface": "#d6e3ff",
+                        "secondary": "#4cd7f6",
+                        "surface-container-lowest": "#010e24",
+                        "surface-variant": "#27354d",
+                        "on-tertiary-container": "#00302b",
+                        "inverse-on-surface": "#233148",
+                        "outline": "#879298",
+                        "on-tertiary": "#003732",
+                        "on-primary": "#003543",
+                        "on-primary-fixed": "#001f28",
+                        "on-surface-variant": "#bdc8ce",
+                        "surface-tint": "#6cd3f7",
+                        "on-secondary-fixed": "#001f26",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#acedff",
+                        "outline-variant": "#3e484d",
+                        "secondary-container": "#03b5d3",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "tertiary": "#6bd8cb",
+                        "on-secondary": "#003640",
+                        "inverse-primary": "#006780",
+                        "on-primary-container": "#002e3b",
+                        "primary-container": "#269dbe",
+                        "background": "#04132a",
+                        "primary-fixed": "#b7eaff",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#00424e",
+                        "on-background": "#d6e3ff",
+                        "surface-dim": "#04132a",
+                        "surface": "#04132a",
+                        "surface-container-low": "#0d1c32",
+                        "surface-container-high": "#1c2a41",
+                        "primary": "#6cd3f7",
+                        "on-error": "#690005",
+                        "tertiary-container": "#29a195",
+                        "on-surface": "#d6e3ff",
+                        "surface-container-highest": "#27354d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar_width_expanded": "240px",
+                        "sidebar_width_collapsed": "56px",
+                        "container_padding": "24px",
+                        "button_height": "40px",
+                        "row_height_table": "40px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "h3-caps": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "h2": ["Inter"],
+                        "h1": ["Inter"],
+                        "label-xs": ["Inter"],
+                        "body": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "h2": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "h1": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-xs": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom styles for specific highly-tailored elements that tailwind utilities don't cover perfectly */
+        .chart-donut {
+            stroke-dasharray: 100 100;
+            stroke-width: 15;
+            fill: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body text-body antialiased overflow-hidden flex">
+<!-- SideNavBar (From JSON) -->
+<nav class="bg-surface-container-lowest border-r border-outline-variant fixed left-0 top-0 h-full w-[56px] hover:w-[240px] transition-all duration-300 z-50 flex flex-col py-4 overflow-x-hidden group">
+<!-- Header / Logo -->
+<div class="px-4 mb-8 flex items-center shrink-0">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance">account_balance</span>
+</div>
+<div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+<h2 class="font-h2 text-h2 text-primary">Treasury Pro</h2>
+<p class="font-label-xs text-label-xs text-on-surface-variant">Global Risk</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 flex flex-col gap-1 w-full">
+<!-- Dashboard -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="dashboard">dashboard</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Dashboard</span>
+</a>
+<!-- Transactions -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="receipt_long">receipt_long</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Transactions</span>
+</a>
+<!-- Hedging -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Hedging</span>
+</a>
+<!-- Payment Terms -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="payments">payments</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Payment Terms</span>
+</a>
+<!-- Currency Basket (ACTIVE) -->
+<a class="flex items-center px-4 py-3 text-secondary border-l-2 border-secondary bg-surface-variant/30 group/item relative opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="currency_exchange" data-weight="fill" style="font-variation-settings: 'FILL' 1;">currency_exchange</span>
+<span class="ml-[14px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap font-medium">Currency Basket</span>
+</a>
+<!-- Credit Risk -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="assessment">assessment</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Credit Risk</span>
+</a>
+<!-- Crypto Settlement -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="currency_bitcoin">currency_bitcoin</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Crypto Settlement</span>
+</a>
+<!-- Reports -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="insert_chart">insert_chart</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Reports</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-[56px] flex flex-col h-screen relative">
+<!-- TopAppBar (From JSON) -->
+<header class="bg-surface-container-low border-b border-outline-variant fixed top-0 right-0 left-[56px] h-[56px] z-40 flex justify-between items-center px-gutter w-[calc(100%-56px)]">
+<div class="flex items-center gap-6">
+<h1 class="font-h2 text-h2 font-bold text-primary">Treasury Risk Manager</h1>
+<!-- Search (on_left configuration) -->
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-high border border-outline-variant text-on-background font-body text-body rounded pl-9 pr-4 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none w-64 placeholder-on-surface-variant" placeholder="Search..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links (Top) -->
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="h-full flex items-center text-on-surface-variant hover:text-secondary transition-colors font-medium" href="#">Portfolio</a>
+<a class="h-full flex items-center text-on-surface-variant hover:text-secondary transition-colors font-medium" href="#">Liquidity</a>
+<a class="h-full flex items-center text-primary border-b-2 border-primary pb-1 font-medium" href="#">Forex</a>
+</nav>
+<!-- Trailing Actions & Profile -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden ml-2">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate financial risk manager in a well-lit office setting. High contrast, sharp focus, suitable for a dark-mode institutional UI avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCNoAa-w6pSvHC8htgZsKTip4IGMRjPWV8-unQoYz3wWaztrRHrnKvqneuoNr9D5qOqqOvLmCXADYbYJpTQnDDJVbfzKMAFrDKY74Ien3VA7WUgll5LeBxqv9tiUVd8ynSsqFNGxxvG__RWfgdy12tUs88utSRfVi05GbTtBFw71u4JcQ30r8i_NkbYzq2nWZX9W5YuWy3Bg5FdX-p_f0HeEA1UCicyF-SP__m10UvzNwtPyLtudvf6gqkn60IombjWHGxJpWQSrU"/>
+</div>
+</div>
+</header>
+<!-- Page Content Canvas -->
+<main class="flex-1 mt-[56px] overflow-y-auto p-container_padding pb-12">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Page Header (Breadcrumb & Title) -->
+<div class="mb-8">
+<div class="flex items-center gap-2 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">
+<a class="hover:text-primary transition-colors" href="#">Dashboard</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-medium">Currency Basket</span>
+</div>
+<h1 class="font-h1 text-h1 text-on-surface">Alternative Currency Basket</h1>
+</div>
+<!-- Top Row: Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Card 1: Volatility -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-secondary">trending_down</span>
+</div>
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant mb-4 uppercase">Portfolio Volatility</h3>
+<div class="flex items-baseline gap-3 mb-2">
+<span class="font-data-mono text-data-mono text-4xl text-on-surface">2.14%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest border border-outline-variant font-data-mono text-data-mono text-[#22C55E]">
+                                vs single-currency: 4.82%
+                            </span>
+<span class="font-label-xs text-label-xs text-[#22C55E]">— 56% reduction</span>
+</div>
+</div>
+<!-- Card 2: Correlation Risk -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-secondary">scatter_plot</span>
+</div>
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant mb-4 uppercase">Correlation Risk</h3>
+<div class="flex items-baseline gap-3 mb-2">
+<span class="font-data-mono text-data-mono text-4xl text-on-surface">0.43</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-primary/10 border border-primary/30 font-label-xs text-label-xs text-primary">
+                                Moderate
+                            </span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">— Good diversification</span>
+</div>
+</div>
+</div>
+<!-- Main Grid: 2 Columns (32% | 68%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Select Currencies (span 4/12 ~ 33%) -->
+<div class="lg:col-span-4 bg-surface-container-high border border-outline-variant rounded-lg flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Select Currencies</h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+</div>
+<!-- List -->
+<div class="flex-1 overflow-y-auto p-2 space-y-1">
+<!-- Checked Rows -->
+<label class="flex items-center justify-between p-3 rounded bg-primary/5 border border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">USD</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">US Dollar</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</label>
+<label class="flex items-center justify-between p-3 rounded bg-primary/5 border border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">EUR</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Euro</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</label>
+<label class="flex items-center justify-between p-3 rounded bg-primary/5 border border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">JPY</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Japanese Yen</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</label>
+<label class="flex items-center justify-between p-3 rounded bg-primary/5 border border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">GBP</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">British Pound</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</label>
+<div class="my-2 border-t border-outline-variant/50"></div>
+<!-- Unchecked Rows -->
+<label class="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">CAD</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Canadian Dollar</span>
+</div>
+</div>
+</label>
+<label class="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">AUD</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Australian Dollar</span>
+</div>
+</div>
+</label>
+<label class="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">CNY</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Chinese Yuan</span>
+</div>
+</div>
+</label>
+<label class="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant bg-surface text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<div class="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">CHF</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Swiss Franc</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Footer -->
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest rounded-b-lg">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-xs text-label-xs text-on-surface-variant">4 currencies selected</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Min 2 req.</span>
+</div>
+<button class="w-full h-button_height bg-primary hover:bg-primary-container text-on-primary font-medium rounded transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="auto_fix_high">auto_fix_high</span>
+                                Apply Optimization
+                            </button>
+</div>
+</div>
+<!-- Right Column: Visualizations (span 8/12 ~ 67%) -->
+<div class="lg:col-span-8 flex flex-col gap-gutter">
+<!-- Recommended Allocation Card -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-6 flex flex-col h-[340px]">
+<div class="border-b border-outline-variant pb-3 mb-6 flex justify-between items-center">
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Recommended Allocation</h3>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="flex-1 flex items-center gap-12 px-4">
+<!-- Donut Chart Area (CSS representation) -->
+<div class="relative w-48 h-48 shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle cx="50" cy="50" fill="none" r="40" stroke="#27354d" stroke-width="15"></circle>
+<!-- USD (45%) -->
+<circle cx="50" cy="50" fill="none" r="40" stroke="#0891B2" stroke-dasharray="113.1 251.2" stroke-dashoffset="0" stroke-width="15"></circle>
+<!-- EUR (25%) -->
+<circle cx="50" cy="50" fill="none" r="40" stroke="#06b6d4" stroke-dasharray="62.8 251.2" stroke-dashoffset="-113.1" stroke-width="15"></circle>
+<!-- JPY (20%) -->
+<circle cx="50" cy="50" fill="none" r="40" stroke="#d97706" stroke-dasharray="50.2 251.2" stroke-dashoffset="-175.9" stroke-width="15"></circle>
+<!-- GBP (10%) -->
+<circle cx="50" cy="50" fill="none" r="40" stroke="#64748b" stroke-dasharray="25.1 251.2" stroke-dashoffset="-226.1" stroke-width="15"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-data-mono text-data-mono text-on-surface text-xl">4</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant uppercase">Assets</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex-1 space-y-3">
+<!-- Legend Item 1 -->
+<div class="flex items-center justify-between p-2 rounded hover:bg-surface-variant/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-[#0891B2]"></div>
+<span class="font-data-mono text-data-mono font-bold text-on-surface">USD</span>
+<span class="font-body text-body text-on-surface-variant min-w-[40px]">45%</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Rp 30.3B</span>
+</div>
+<!-- Legend Item 2 -->
+<div class="flex items-center justify-between p-2 rounded hover:bg-surface-variant/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-[#06b6d4]"></div>
+<span class="font-data-mono text-data-mono font-bold text-on-surface">EUR</span>
+<span class="font-body text-body text-on-surface-variant min-w-[40px]">25%</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Rp 16.8B</span>
+</div>
+<!-- Legend Item 3 -->
+<div class="flex items-center justify-between p-2 rounded hover:bg-surface-variant/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-[#d97706]"></div>
+<span class="font-data-mono text-data-mono font-bold text-on-surface">JPY</span>
+<span class="font-body text-body text-on-surface-variant min-w-[40px]">20%</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Rp 13.5B</span>
+</div>
+<!-- Legend Item 4 -->
+<div class="flex items-center justify-between p-2 rounded hover:bg-surface-variant/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-[#64748b]"></div>
+<span class="font-data-mono text-data-mono font-bold text-on-surface">GBP</span>
+<span class="font-body text-body text-on-surface-variant min-w-[40px]">10%</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Rp 6.7B</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Correlation Matrix Card -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-6 flex flex-col">
+<div class="border-b border-outline-variant pb-3 mb-6 flex justify-between items-center">
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Correlation Matrix</h3>
+<div class="flex items-center gap-2 font-label-xs text-label-xs text-on-surface-variant">
+<span>Low</span>
+<div class="w-16 h-2 rounded bg-gradient-to-r from-surface-container-lowest to-primary"></div>
+<span>High</span>
+</div>
+</div>
+<!-- Matrix Grid -->
+<div class="w-full overflow-x-auto">
+<div class="grid grid-cols-5 gap-1 min-w-[400px]">
+<!-- Header Row -->
+<div class="h-10"></div> <!-- Empty top-left corner -->
+<div class="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">USD</div>
+<div class="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">EUR</div>
+<div class="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">JPY</div>
+<div class="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">GBP</div>
+<!-- Row 1: USD -->
+<div class="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-outline-variant/30">USD</div>
+<div class="h-12 bg-primary flex items-center justify-center font-data-mono text-data-mono text-on-primary font-bold rounded">1.00</div>
+<div class="h-12 bg-primary/80 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.82</div>
+<div class="h-12 bg-primary/30 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.34</div>
+<div class="h-12 bg-primary/60 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.61</div>
+<!-- Row 2: EUR -->
+<div class="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-outline-variant/30">EUR</div>
+<div class="h-12 bg-primary/80 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.82</div>
+<div class="h-12 bg-primary flex items-center justify-center font-data-mono text-data-mono text-on-primary font-bold rounded">1.00</div>
+<div class="h-12 bg-primary/20 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.25</div>
+<div class="h-12 bg-primary/70 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.74</div>
+<!-- Row 3: JPY -->
+<div class="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-outline-variant/30">JPY</div>
+<div class="h-12 bg-primary/30 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.34</div>
+<div class="h-12 bg-primary/20 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.25</div>
+<div class="h-12 bg-primary flex items-center justify-center font-data-mono text-data-mono text-on-primary font-bold rounded">1.00</div>
+<div class="h-12 bg-primary/40 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.41</div>
+<!-- Row 4: GBP -->
+<div class="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-outline-variant/30">GBP</div>
+<div class="h-12 bg-primary/60 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.61</div>
+<div class="h-12 bg-primary/70 flex items-center justify-center font-data-mono text-data-mono text-on-primary-fixed rounded">0.74</div>
+<div class="h-12 bg-primary/40 flex items-center justify-center font-data-mono text-data-mono text-on-surface rounded">0.41</div>
+<div class="h-12 bg-primary flex items-center justify-center font-data-mono text-data-mono text-on-primary font-bold rounded">1.00</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

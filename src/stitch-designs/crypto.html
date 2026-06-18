@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Crypto Settlement Gateway - GLOBALTRADE ERP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-high": "#1c2a41",
+                        "surface-dim": "#04132a",
+                        "surface-tint": "#6cd3f7",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "primary-container": "#269dbe",
+                        "primary": "#6cd3f7",
+                        "tertiary-fixed-dim": "#6bd8cb",
+                        "on-tertiary-fixed": "#00201d",
+                        "secondary-fixed": "#acedff",
+                        "secondary-container": "#03b5d3",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "on-secondary-container": "#00424e",
+                        "background": "#04132a",
+                        "on-secondary": "#003640",
+                        "surface-container-low": "#0d1c32",
+                        "on-tertiary": "#003732",
+                        "on-primary-fixed": "#001f28",
+                        "tertiary-container": "#29a195",
+                        "outline-variant": "#3e484d",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#d6e3ff",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#004e61",
+                        "secondary": "#4cd7f6",
+                        "on-primary-container": "#002e3b",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "inverse-primary": "#006780",
+                        "surface-container-lowest": "#010e24",
+                        "surface-container": "#112036",
+                        "surface-bright": "#2c3952",
+                        "surface-variant": "#27354d",
+                        "on-tertiary-container": "#00302b",
+                        "tertiary": "#6bd8cb",
+                        "on-surface-variant": "#bdc8ce",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "primary-fixed": "#b7eaff",
+                        "inverse-on-surface": "#233148",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001f26",
+                        "tertiary-fixed": "#89f5e7",
+                        "on-surface": "#d6e3ff",
+                        "surface": "#04132a",
+                        "on-primary": "#003543",
+                        "on-background": "#d6e3ff",
+                        "surface-container-highest": "#27354d",
+                        "outline": "#879298"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "gutter": "16px",
+                        "sidebar_width_expanded": "240px",
+                        "sidebar_width_collapsed": "56px",
+                        "row_height_table": "40px",
+                        "container_padding": "24px",
+                        "button_height": "40px"
+                    },
+                    fontFamily: {
+                        "h3-caps": ["Inter"],
+                        "h1": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body": ["Inter"],
+                        "label-xs": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    fontSize: {
+                        "h3-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "h1": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "data-mono": ["13px", { lineHeight: "18px", fontWeight: "500" }],
+                        "body": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "label-xs": ["11px", { lineHeight: "14px", fontWeight: "500" }],
+                        "h2": ["16px", { lineHeight: "24px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3e484d; }
+        
+        /* Specific borders mentioned in guidance */
+        .card-base { background-color: #16243B; border: 1px solid #1E3A5F; border-radius: 12px; }
+        .input-base { background-color: #0F1B2D; border: 1px solid #1E3A5F; color: #F8FAFC; }
+        .input-base:focus { border-color: #0891B2; box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2); outline: none; }
+        .btn-primary { background-color: #0891B2; color: #ffffff; border-radius: 8px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-secondary { background-color: transparent; border: 1px solid #0891B2; color: #0891B2; border-radius: 8px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+        
+        .pulse-ring {
+            animation: pulsate 2s ease-out infinite;
+            transform-origin: center;
+        }
+        @keyframes pulsate {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-[#0F1B2D] text-on-background font-body text-body min-h-screen flex overflow-hidden">
+<!-- TopNavBar (Hidden on desktop due to side nav layout typically, but including structural mapping if needed. Adapting for sidebar layout) -->
+<!-- SideNavBar -->
+<nav class="bg-surface-dim dark:bg-surface-dim flex flex-col h-full fixed left-0 top-0 z-40 docked left-0 h-full w-sidebar_width_collapsed hover:w-sidebar_width_expanded transition-all duration-300 border-r border-outline-variant flat no shadows group">
+<!-- Header -->
+<div class="h-16 flex items-center px-4 border-b border-outline-variant whitespace-nowrap overflow-hidden">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div class="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span class="font-h3-caps text-h3-caps text-primary">GLOBALTRADE</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Treasury Risk</span>
+</div>
+</div>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 py-4 flex flex-col gap-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
+<!-- 0: Risk Overview -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="dashboard">dashboard</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Risk Overview</span>
+</a>
+<!-- 1: Transactions -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="swap_horiz">swap_horiz</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Transactions</span>
+</a>
+<!-- 2: Hedging -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="shield">shield</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Hedging</span>
+</a>
+<!-- 3: Payment Terms -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="payments">payments</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Payment Terms</span>
+</a>
+<!-- 4: Currency Basket -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="currency_exchange">currency_exchange</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Currency Basket</span>
+</a>
+<!-- 5: Credit Risk -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="gavel">gavel</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Credit Risk</span>
+</a>
+<!-- 6: Crypto Settlement (ACTIVE) -->
+<a class="flex items-center h-10 px-4 text-primary border-l-4 border-primary bg-surface-container-highest cursor-pointer transition-all whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0 -ml-[4px]" data-icon="currency_bitcoin">currency_bitcoin</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Crypto Settlement</span>
+</a>
+<!-- 7: Reports -->
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="assessment">assessment</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Reports</span>
+</a>
+</div>
+<!-- Footer -->
+<div class="mt-auto border-t border-outline-variant py-2 flex flex-col gap-1 overflow-hidden">
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="settings">settings</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Settings</span>
+</a>
+<a class="flex items-center h-10 px-4 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer whitespace-nowrap" href="#">
+<span class="material-symbols-outlined shrink-0" data-icon="logout">logout</span>
+<span class="ml-4 font-label-xs text-label-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-[56px] flex flex-col h-screen overflow-hidden bg-[#0F1B2D]">
+<!-- Top App Bar / Header -->
+<header class="h-16 px-6 flex items-center justify-between border-b border-[#1E3A5F] bg-[#0F1B2D] shrink-0 z-10">
+<div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-xs text-label-xs mb-1">
+<span class="material-symbols-outlined text-[14px]">home</span>
+<span>/</span>
+<span class="text-primary">Crypto Settlement</span>
+</div>
+<h1 class="font-h1 text-h1 text-on-surface">Cryptocurrency Settlement Gateway</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full border border-[#1E3A5F] flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-[#1E3A5F] overflow-hidden">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A detailed headshot portrait of a professional financial controller in their 40s, wearing a sharp navy blue blazer, set against a dark grey studio background with soft cinematic lighting, creating a serious and trustworthy mood. High-key light-mode aesthetic but dark environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApjSgeoMqM3ZqfM1XcjiuNLn91iJt0t4gKz2LjqU66vS3huTm6d7EF7rFYe41F1T4MQFnRThVHZfoyaigqQgzy8le683Vz1YKsg7fRqdIeQYYOjNDLyo_gKX4WN_yUfkXkqd8rAbvm20XSH8S_m6iUBf0dJ7QnIzCDntZ3nVIpsGarhqbJ2RAoG6MLFTIaGXumii-xERGRHmCYuW_qlafu4AzIbzFNQ2V6nN-iPxa3yQsVGlracOcRxvxs2DnIm2bpl3BaZ6SbpKU"/>
+</div>
+</div>
+</header>
+<!-- Floating Toast -->
+<div class="absolute top-20 right-6 z-50 flex items-start gap-3 bg-[#1E2D44] border border-[#F59E0B] rounded-lg p-4 w-80 shadow-lg animate-[slideIn_0.3s_ease-out]">
+<span class="material-symbols-outlined text-[#F59E0B]">warning</span>
+<div>
+<h4 class="font-h2 text-h2 text-[#F59E0B]">Ethereum Gas Fees High</h4>
+<p class="font-label-xs text-label-xs text-on-surface-variant mt-1">Current base fee is 85 gwei. Settlement times may be delayed or incur higher costs.</p>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface ml-auto"><span class="material-symbols-outlined text-[18px]">close</span></button>
+</div>
+<!-- Scrollable Content Canvas -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+<div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+<!-- Left Column (44% ~ 5 columns) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- New Crypto Payment Card -->
+<div class="card-base flex flex-col p-5">
+<div class="border-b border-[#1E3A5F] pb-4 mb-5">
+<h2 class="font-h2 text-h2 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                                New Crypto Payment
+                            </h2>
+</div>
+<div class="flex flex-col gap-5 flex-1">
+<!-- Network Selection -->
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-3">Blockchain Network</label>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex flex-col p-3 border border-primary bg-[#0891B2]/10 rounded-lg cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-center mb-1">
+<span class="font-body text-body text-primary font-medium">Ethereum</span>
+<span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">ERC-20</span>
+<input checked="" class="hidden" name="network" type="radio" value="eth"/>
+</label>
+<label class="flex flex-col p-3 border border-[#1E3A5F] hover:border-[#3e484d] rounded-lg cursor-pointer transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="font-body text-body text-on-surface">Polygon</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">radio_button_unchecked</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">MATIC</span>
+<input class="hidden" name="network" type="radio" value="poly"/>
+</label>
+<label class="flex flex-col p-3 border border-[#1E3A5F] hover:border-[#3e484d] rounded-lg cursor-pointer transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="font-body text-body text-on-surface">BSC</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">radio_button_unchecked</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">BEP-20</span>
+<input class="hidden" name="network" type="radio" value="bsc"/>
+</label>
+<label class="flex flex-col p-3 border border-[#1E3A5F] hover:border-[#3e484d] rounded-lg cursor-pointer transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="font-body text-body text-on-surface">Solana</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">radio_button_unchecked</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">SPL</span>
+<input class="hidden" name="network" type="radio" value="sol"/>
+</label>
+</div>
+</div>
+<!-- Input Fields -->
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">Destination Wallet Address</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">wallet</span>
+<input class="input-base w-full h-10 pl-10 pr-3 rounded-md font-data-mono text-data-mono" readonly="" type="text" value="0xA1B2C3D4E5F6789012345678901234567890ABCD"/>
+</div>
+</div>
+<div>
+<label class="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">Amount</label>
+<div class="relative">
+<input class="input-base w-full h-10 pl-3 pr-16 rounded-md font-data-mono text-data-mono text-right" readonly="" type="text" value="1.50"/>
+<div class="absolute right-1 top-1 bottom-1 bg-[#1E2D44] px-3 flex items-center rounded text-on-surface font-label-xs text-label-xs border border-[#1E3A5F]">
+                                        USDC
+                                    </div>
+</div>
+</div>
+<!-- Compliance Check -->
+<div class="mt-2 p-3 bg-[#16A34A]/10 border border-[#16A34A]/30 rounded-lg flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-[#16A34A]/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[#22C55E] text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="font-label-xs text-label-xs text-[#22C55E] font-medium">AML/KYC Compliance Verified</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant opacity-80 text-[10px] mt-0.5">Wallet cleared against global sanctions lists.</div>
+</div>
+</div>
+<div class="mt-auto pt-4 flex gap-3">
+<button class="btn-secondary flex-1">Cancel</button>
+<button class="btn-primary flex-1">Initiate Settlement</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (56% ~ 7 columns) -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Settlement Status Card -->
+<div class="card-base flex flex-col p-5 h-full">
+<div class="border-b border-[#1E3A5F] pb-4 mb-5 flex justify-between items-center">
+<h2 class="font-h2 text-h2 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">monitoring</span>
+                                Settlement Status
+                            </h2>
+<span class="font-data-mono text-data-mono text-on-surface-variant bg-[#1E2D44] px-2 py-1 rounded border border-[#1E3A5F]">TRX-CRYPTO-0089</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+<!-- Progress Ring Area -->
+<div class="flex flex-col items-center justify-center bg-[#0F1B2D] p-6 rounded-xl border border-[#1E3A5F]">
+<div class="relative w-40 h-40 flex items-center justify-center">
+<!-- Background circle -->
+<svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="45" stroke="#1E3A5F" stroke-width="8"></circle>
+<!-- Progress circle (67% of 282.7 perimeter) -->
+<circle class="transition-all duration-1000 ease-in-out" cx="50" cy="50" fill="none" r="45" stroke="#0891B2" stroke-dasharray="282.7" stroke-dashoffset="93.3" stroke-width="8"></circle>
+</svg>
+<div class="flex flex-col items-center text-center z-10">
+<span class="font-h1 text-h1 text-primary">67%</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant mt-1">4/6 Blocks</span>
+</div>
+</div>
+<div class="mt-4 font-label-xs text-label-xs text-[#0891B2] animate-pulse">Awaiting final confirmations...</div>
+</div>
+<!-- Vertical Timeline -->
+<div class="flex flex-col justify-center">
+<div class="relative pl-6 space-y-6">
+<!-- Line -->
+<div class="absolute left-[11px] top-2 bottom-2 w-0.5 bg-[#1E3A5F]"></div>
+<div class="absolute left-[11px] top-2 h-[60%] w-0.5 bg-[#0891B2]"></div>
+<!-- Step 1 Completed -->
+<div class="relative">
+<div class="absolute -left-[30px] top-0 w-6 h-6 rounded-full bg-[#1E2D44] border border-[#0891B2] flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div>
+<div class="font-label-xs text-label-xs text-on-surface font-medium">Transaction Initiated</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant text-[10px]">10:42:01 UTC</div>
+</div>
+</div>
+<!-- Step 2 Completed -->
+<div class="relative">
+<div class="absolute -left-[30px] top-0 w-6 h-6 rounded-full bg-[#1E2D44] border border-[#0891B2] flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div>
+<div class="font-label-xs text-label-xs text-on-surface font-medium">Broadcast to Network</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant text-[10px] font-data-mono">TxHash: 0x8f7c...3b9a</div>
+</div>
+</div>
+<!-- Step 3 Current -->
+<div class="relative">
+<div class="absolute -left-[30px] top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center z-10 shadow-[0_0_10px_rgba(8,145,178,0.5)]">
+<div class="absolute w-full h-full rounded-full border-2 border-primary pulse-ring"></div>
+<span class="material-symbols-outlined text-[14px] text-[#0F1B2D]" style="font-variation-settings: 'FILL' 1;">sync</span>
+</div>
+<div>
+<div class="font-label-xs text-label-xs text-primary font-medium">Block Confirmations</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant text-[10px]">4 of 6 required blocks verified</div>
+</div>
+</div>
+<!-- Step 4 Pending -->
+<div class="relative">
+<div class="absolute -left-[30px] top-0 w-6 h-6 rounded-full bg-[#0F1B2D] border border-[#1E3A5F] flex items-center justify-center z-10">
+<span class="w-1.5 h-1.5 rounded-full bg-[#3e484d]"></span>
+</div>
+<div class="opacity-50">
+<div class="font-label-xs text-label-xs text-on-surface font-medium">Final Settlement</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant text-[10px]">Pending confirmation</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Settlement History Table -->
+<div class="mt-auto">
+<h3 class="font-h3-caps text-h3-caps text-on-surface-variant mb-3 uppercase tracking-wider">Recent History</h3>
+<div class="border border-[#1E3A5F] rounded-lg overflow-hidden bg-[#0F1B2D]">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#1E2D44] border-b border-[#1E3A5F]">
+<th class="py-2 px-4 font-h3-caps text-h3-caps text-[#94A3B8]">Reference</th>
+<th class="py-2 px-4 font-h3-caps text-h3-caps text-[#94A3B8]">Amount</th>
+<th class="py-2 px-4 font-h3-caps text-h3-caps text-[#94A3B8]">Network</th>
+<th class="py-2 px-4 font-h3-caps text-h3-caps text-[#94A3B8] text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface text-[12px]">
+<tr class="border-b border-[#1E3A5F] hover:bg-[#16243B] transition-colors">
+<td class="py-2.5 px-4">TRX-0088</td>
+<td class="py-2.5 px-4">50.00 USDC</td>
+<td class="py-2.5 px-4 font-body">Polygon</td>
+<td class="py-2.5 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A]">Settled</span>
+</td>
+</tr>
+<tr class="bg-[#16243B] border-b border-[#1E3A5F] hover:bg-[#192E48] transition-colors">
+<td class="py-2.5 px-4">TRX-0087</td>
+<td class="py-2.5 px-4">2.45 ETH</td>
+<td class="py-2.5 px-4 font-body">Ethereum</td>
+<td class="py-2.5 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A]">Settled</span>
+</td>
+</tr>
+<tr class="hover:bg-[#16243B] transition-colors">
+<td class="py-2.5 px-4">TRX-0086</td>
+<td class="py-2.5 px-4">1000 USDT</td>
+<td class="py-2.5 px-4 font-body">BSC</td>
+<td class="py-2.5 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]">Failed</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
