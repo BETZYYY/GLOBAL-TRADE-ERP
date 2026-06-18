@@ -1,252 +1,235 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  TrendingDown, ScatterPlot, FilterList, DragIndicator, 
-  AutoFixHigh, MoreVert, CurrencyExchange 
-} from '@mui/icons-material';
-import useRates from '../hooks/useRates';
+import { useState } from 'react';
 
 export default function CurrencyBasket() {
-  const { fetchRates } = useRates();
-  const [loading, setLoading] = useState(true);
+  const [selectedCurrencies, setSelectedCurrencies] = useState({
+    USD: true,
+    EUR: true,
+    JPY: true,
+    GBP: true,
+    CAD: false,
+    AUD: false,
+    CNY: false,
+    CHF: false
+  });
 
-  const [currencies, setCurrencies] = useState([
-    { id: 'USD', name: 'US Dollar', selected: true },
-    { id: 'EUR', name: 'Euro', selected: true },
-    { id: 'JPY', name: 'Japanese Yen', selected: true },
-    { id: 'GBP', name: 'British Pound', selected: true },
-    { id: 'CAD', name: 'Canadian Dollar', selected: false },
-    { id: 'AUD', name: 'Australian Dollar', selected: false },
-    { id: 'CNY', name: 'Chinese Yuan', selected: false },
-    { id: 'CHF', name: 'Swiss Franc', selected: false },
-  ]);
+  const currencies = [
+    { code: 'USD', name: 'US Dollar', color: '#0891B2' },
+    { code: 'EUR', name: 'Euro', color: '#06b6d4' },
+    { code: 'JPY', name: 'Japanese Yen', color: '#d97706' },
+    { code: 'GBP', name: 'British Pound', color: '#64748b' },
+    { code: 'CAD', name: 'Canadian Dollar', color: '#10b981' },
+    { code: 'AUD', name: 'Australian Dollar', color: '#f59e0b' },
+    { code: 'CNY', name: 'Chinese Yuan', color: '#ef4444' },
+    { code: 'CHF', name: 'Swiss Franc', color: '#8b5cf6' }
+  ];
 
-  useEffect(() => {
-    // Fetch rates just to verify backend connection for this demo page
-    fetchRates().then(() => {
-      setTimeout(() => setLoading(false), 800);
-    });
-  }, [fetchRates]);
-
-  const toggleCurrency = (id) => {
-    setCurrencies(currencies.map(c => c.id === id ? { ...c, selected: !c.selected } : c));
+  const handleToggle = (code) => {
+    setSelectedCurrencies(prev => ({ ...prev, [code]: !prev[code] }));
   };
 
-  const selectedCount = currencies.filter(c => c.selected).length;
-
-  if (loading) {
-    return (
-      <div className="space-y-6 max-w-7xl mx-auto animate-pulse">
-        <div className="h-8 bg-surface-elevated rounded w-1/4 mb-6"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="h-32 bg-surface-elevated rounded-xl"></div>
-          <div className="h-32 bg-surface-elevated rounded-xl"></div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-4 h-[600px] bg-surface-elevated rounded-xl"></div>
-          <div className="lg:col-span-8 flex flex-col gap-6">
-            <div className="h-[300px] bg-surface-elevated rounded-xl"></div>
-            <div className="flex-1 bg-surface-elevated rounded-xl min-h-[300px]"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const selectedCount = Object.values(selectedCurrencies).filter(Boolean).length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Alternative Currency Basket</h1>
-      </div>
-
-      {/* Top Row: Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingDown sx={{ fontSize: 64 }} className="text-accent-cyan" />
-          </div>
-          <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Portfolio Volatility</h3>
-          <div className="flex items-baseline gap-3 mb-2">
-            <span className="font-mono text-4xl text-white">2.14%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-surface border border-surface-elevated font-mono text-risk-low text-xs">
-              vs single-currency: 4.82%
-            </span>
-            <span className="text-xs text-risk-low">— 56% reduction</span>
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col h-full bg-brand-midnight-base">
+      {/* Page Header */}
+      <div className="flex justify-between items-center w-full mb-6">
+        <div className="flex items-center gap-6">
+          <h1 className="font-h2 text-h2 font-bold text-brand-teal">Treasury Risk Manager</h1>
+          <div className="relative hidden lg:block">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+            <input className="bg-brand-midnight-card ghost-border text-white font-body text-body rounded-md pl-9 pr-4 py-1.5 focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none w-64 placeholder-on-surface-variant" placeholder="Search..." type="text"/>
           </div>
         </div>
-
-        <div className="card p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <ScatterPlot sx={{ fontSize: 64 }} className="text-accent-cyan" />
-          </div>
-          <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Correlation Risk</h3>
-          <div className="flex items-baseline gap-3 mb-2">
-            <span className="font-mono text-4xl text-white">0.43</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-accent-cyan/10 border border-accent-cyan/30 text-xs text-accent-cyan">
-              Moderate
-            </span>
-            <span className="text-xs text-slate-400">— Good diversification</span>
-          </div>
-        </div>
+        <nav className="hidden md:flex items-center gap-8 h-full">
+          <a className="h-full flex items-center text-on-surface-variant hover:text-brand-teal transition-colors font-medium" href="#portfolio">Portfolio</a>
+          <a className="h-full flex items-center text-on-surface-variant hover:text-brand-teal transition-colors font-medium" href="#liquidity">Liquidity</a>
+          <a className="h-full flex items-center text-brand-teal border-b-2 border-brand-teal pb-1 font-medium" href="#forex">Forex</a>
+        </nav>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Select Currencies */}
-        <div className="lg:col-span-4 card flex flex-col h-[600px]">
-          <div className="p-4 border-b border-surface-elevated flex justify-between items-center">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select Currencies</h3>
-            <button className="text-slate-400 hover:text-white transition-colors">
-              <FilterList fontSize="small" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[600px]">
+        {/* Left Column: Basket Configuration (span 4/12 ~ 33%) */}
+        <div className="lg:col-span-4 flex flex-col h-full bg-brand-midnight-card ghost-border rounded-xl flex-1 overflow-hidden">
+          
+          <div className="p-4 border-b border-brand-midnight-border flex justify-between items-center bg-[#1E2D44]/30">
+            <h2 className="font-h2 text-h2 text-white">Basket Configuration</h2>
+            <button className="text-brand-teal hover:underline text-sm font-medium flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">add</span> Add
             </button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-            {currencies.filter(c => c.selected).map(c => (
-              <label key={c.id} className="flex items-center justify-between p-3 rounded bg-accent-cyan/10 border border-accent-cyan/30 cursor-pointer hover:bg-accent-cyan/20 transition-colors">
+
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {/* Checked Rows */}
+            {currencies.filter(c => selectedCurrencies[c.code]).map((c) => (
+              <label key={c.code} className="flex items-center justify-between p-3 rounded bg-brand-teal/10 border border-brand-teal/20 cursor-pointer hover:bg-brand-teal/20 transition-colors">
                 <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={c.selected} onChange={() => toggleCurrency(c.id)} className="rounded border-surface-elevated bg-surface text-accent-cyan focus:ring-accent-cyan" />
+                  <input 
+                    type="checkbox" 
+                    checked 
+                    onChange={() => handleToggle(c.code)}
+                    className="rounded border-outline-variant bg-surface text-brand-teal focus:ring-brand-teal"
+                  />
                   <div className="flex flex-col">
-                    <span className="font-mono font-bold text-white">{c.id}</span>
-                    <span className="text-xs text-slate-400">{c.name}</span>
+                    <span className="font-data-mono text-data-mono font-bold text-white">{c.code}</span>
+                    <span className="font-label-xs text-label-xs text-on-surface-variant">{c.name}</span>
                   </div>
                 </div>
-                <DragIndicator fontSize="small" className="text-accent-cyan" />
+                <span className="material-symbols-outlined text-brand-teal text-sm">drag_indicator</span>
               </label>
             ))}
 
-            <div className="my-2 border-t border-surface-elevated"></div>
+            <div className="my-2 border-t border-brand-midnight-border/50"></div>
 
-            {currencies.filter(c => !c.selected).map(c => (
-              <label key={c.id} className="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-surface-elevated/50 transition-colors group">
+            {/* Unchecked Rows */}
+            {currencies.filter(c => !selectedCurrencies[c.code]).map((c) => (
+              <label key={c.code} className="flex items-center justify-between p-3 rounded border border-transparent cursor-pointer hover:bg-brand-midnight-base transition-colors group">
                 <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={c.selected} onChange={() => toggleCurrency(c.id)} className="rounded border-surface-elevated bg-surface text-accent-cyan focus:ring-accent-cyan" />
+                  <input 
+                    type="checkbox" 
+                    checked={false} 
+                    onChange={() => handleToggle(c.code)}
+                    className="rounded border-outline-variant bg-surface text-brand-teal focus:ring-brand-teal"
+                  />
                   <div className="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
-                    <span className="font-mono font-bold text-white">{c.id}</span>
-                    <span className="text-xs text-slate-400">{c.name}</span>
+                    <span className="font-data-mono text-data-mono font-bold text-white">{c.code}</span>
+                    <span className="font-label-xs text-label-xs text-on-surface-variant">{c.name}</span>
                   </div>
                 </div>
               </label>
             ))}
           </div>
 
-          <div className="p-4 border-t border-surface-elevated bg-surface">
+          {/* Footer */}
+          <div className="p-4 border-t border-brand-midnight-border bg-[#1E2D44]/10 rounded-b-xl">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-xs text-slate-400">{selectedCount} currencies selected</span>
-              <span className="text-xs text-slate-400">Min 2 req.</span>
+              <span className="font-label-xs text-label-xs text-on-surface-variant">{selectedCount} currencies selected</span>
+              <span className="font-label-xs text-label-xs text-on-surface-variant">Min 2 req.</span>
             </div>
-            <button className="w-full btn-primary h-10 flex items-center justify-center gap-2" disabled={selectedCount < 2}>
-              <AutoFixHigh fontSize="small" /> Apply Optimization
+            <button className="w-full h-button_height bg-brand-teal hover:bg-[#06b6d4] text-white font-medium rounded-md transition-colors flex items-center justify-center gap-2 focus-glow">
+              <span className="material-symbols-outlined text-sm">auto_fix_high</span>
+              Apply Optimization
             </button>
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          
-          <div className="card p-6 flex flex-col h-[300px]">
-            <div className="border-b border-surface-elevated pb-3 mb-6 flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Recommended Allocation</h3>
-              <button className="text-slate-400 hover:text-white transition-colors">
-                <MoreVert fontSize="small" />
+        {/* Right Column: Visualizations (span 8/12 ~ 67%) */}
+        <div className="lg:col-span-8 flex flex-col gap-6 h-full">
+          {/* Recommended Allocation Card */}
+          <div className="bg-brand-midnight-card ghost-border rounded-xl p-6 flex flex-col min-h-[340px]">
+            <div className="border-b border-brand-midnight-border pb-3 mb-6 flex justify-between items-center">
+              <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Recommended Allocation</h3>
+              <button className="text-on-surface-variant hover:text-white transition-colors">
+                <span className="material-symbols-outlined text-sm">more_vert</span>
               </button>
             </div>
             <div className="flex-1 flex items-center gap-12 px-4">
-              <div className="relative w-40 h-40 shrink-0">
+              {/* Donut Chart Area */}
+              <div className="relative w-48 h-48 shrink-0">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#27354d" strokeWidth="15" />
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#0891B2" strokeDasharray="113.1 251.2" strokeDashoffset="0" strokeWidth="15" />
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#06b6d4" strokeDasharray="62.8 251.2" strokeDashoffset="-113.1" strokeWidth="15" />
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#d97706" strokeDasharray="50.2 251.2" strokeDashoffset="-175.9" strokeWidth="15" />
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#64748b" strokeDasharray="25.1 251.2" strokeDashoffset="-226.1" strokeWidth="15" />
+                  <circle cx="50" cy="50" fill="none" r="40" stroke="#1E3A5F" strokeWidth="15"></circle>
+                  {/* Fake donut data just to match the visual */}
+                  <circle cx="50" cy="50" fill="none" r="40" stroke="#0891B2" strokeDasharray="113.1 251.2" strokeDashoffset="0" strokeWidth="15"></circle>
+                  <circle cx="50" cy="50" fill="none" r="40" stroke="#06b6d4" strokeDasharray="62.8 251.2" strokeDashoffset="-113.1" strokeWidth="15"></circle>
+                  <circle cx="50" cy="50" fill="none" r="40" stroke="#d97706" strokeDasharray="50.2 251.2" strokeDashoffset="-175.9" strokeWidth="15"></circle>
+                  <circle cx="50" cy="50" fill="none" r="40" stroke="#64748b" strokeDasharray="25.1 251.2" strokeDashoffset="-226.1" strokeWidth="15"></circle>
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-mono text-2xl text-white">4</span>
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest">Assets</span>
+                  <span className="font-data-mono text-data-mono text-white text-xl">{selectedCount}</span>
+                  <span className="font-label-xs text-label-xs text-on-surface-variant uppercase">Assets</span>
                 </div>
               </div>
 
+              {/* Legend */}
               <div className="flex-1 space-y-3">
-                {[
-                  { name: 'USD', pct: '45%', val: 'Rp 30.3B', color: 'bg-[#0891B2]' },
-                  { name: 'EUR', pct: '25%', val: 'Rp 16.8B', color: 'bg-[#06b6d4]' },
-                  { name: 'JPY', pct: '20%', val: 'Rp 13.5B', color: 'bg-[#d97706]' },
-                  { name: 'GBP', pct: '10%', val: 'Rp 6.7B', color: 'bg-[#64748b]' }
-                ].map(item => (
-                  <div key={item.name} className="flex items-center justify-between p-2 rounded hover:bg-surface-elevated/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                      <span className="font-mono font-bold text-white">{item.name}</span>
-                      <span className="text-sm text-slate-400 min-w-[40px]">{item.pct}</span>
-                    </div>
-                    <span className="font-mono text-slate-400">{item.val}</span>
+                <div className="flex items-center justify-between p-2 rounded hover:bg-brand-midnight-base transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#0891B2]"></div>
+                    <span className="font-data-mono text-data-mono font-bold text-white">USD</span>
+                    <span className="font-body text-body text-on-surface-variant min-w-[40px]">45%</span>
                   </div>
-                ))}
+                  <span className="font-data-mono text-data-mono text-on-surface-variant">Rp 30.3B</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded hover:bg-brand-midnight-base transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#06b6d4]"></div>
+                    <span className="font-data-mono text-data-mono font-bold text-white">EUR</span>
+                    <span className="font-body text-body text-on-surface-variant min-w-[40px]">25%</span>
+                  </div>
+                  <span className="font-data-mono text-data-mono text-on-surface-variant">Rp 16.8B</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded hover:bg-brand-midnight-base transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#d97706]"></div>
+                    <span className="font-data-mono text-data-mono font-bold text-white">JPY</span>
+                    <span className="font-body text-body text-on-surface-variant min-w-[40px]">20%</span>
+                  </div>
+                  <span className="font-data-mono text-data-mono text-on-surface-variant">Rp 13.5B</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded hover:bg-brand-midnight-base transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#64748b]"></div>
+                    <span className="font-data-mono text-data-mono font-bold text-white">GBP</span>
+                    <span className="font-body text-body text-on-surface-variant min-w-[40px]">10%</span>
+                  </div>
+                  <span className="font-data-mono text-data-mono text-on-surface-variant">Rp 6.7B</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6 flex flex-col flex-1">
-            <div className="border-b border-surface-elevated pb-3 mb-6 flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Correlation Matrix</h3>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+          {/* Correlation Matrix Card */}
+          <div className="bg-brand-midnight-card ghost-border rounded-xl p-6 flex flex-col flex-1">
+            <div className="border-b border-brand-midnight-border pb-3 mb-6 flex justify-between items-center">
+              <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Correlation Matrix</h3>
+              <div className="flex items-center gap-2 font-label-xs text-label-xs text-on-surface-variant">
                 <span>Low</span>
-                <div className="w-16 h-2 rounded bg-gradient-to-r from-surface to-accent-cyan"></div>
+                <div className="w-16 h-2 rounded bg-gradient-to-r from-[#0F1B2D] to-brand-teal"></div>
                 <span>High</span>
               </div>
             </div>
 
-            <div className="w-full overflow-x-auto">
+            {/* Matrix Grid */}
+            <div className="w-full overflow-x-auto flex-1">
               <div className="grid grid-cols-5 gap-1 min-w-[400px]">
+                {/* Header Row */}
                 <div className="h-10"></div>
-                {['USD', 'EUR', 'JPY', 'GBP'].map(c => (
-                  <div key={c} className="h-10 flex items-center justify-center font-mono font-bold text-slate-400">{c}</div>
-                ))}
+                <div className="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">USD</div>
+                <div className="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">EUR</div>
+                <div className="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">JPY</div>
+                <div className="h-10 flex items-center justify-center font-data-mono text-data-mono font-bold text-on-surface-variant">GBP</div>
 
-                {[
-                  ['USD', [
-                    { val: '1.00', bg: 'bg-accent-cyan', text: 'text-surface font-bold' },
-                    { val: '0.82', bg: 'bg-accent-cyan/80', text: 'text-surface font-bold' },
-                    { val: '0.34', bg: 'bg-accent-cyan/30', text: 'text-white' },
-                    { val: '0.61', bg: 'bg-accent-cyan/60', text: 'text-surface font-bold' }
-                  ]],
-                  ['EUR', [
-                    { val: '0.82', bg: 'bg-accent-cyan/80', text: 'text-surface font-bold' },
-                    { val: '1.00', bg: 'bg-accent-cyan', text: 'text-surface font-bold' },
-                    { val: '0.25', bg: 'bg-accent-cyan/20', text: 'text-white' },
-                    { val: '0.74', bg: 'bg-accent-cyan/70', text: 'text-surface font-bold' }
-                  ]],
-                  ['JPY', [
-                    { val: '0.34', bg: 'bg-accent-cyan/30', text: 'text-white' },
-                    { val: '0.25', bg: 'bg-accent-cyan/20', text: 'text-white' },
-                    { val: '1.00', bg: 'bg-accent-cyan', text: 'text-surface font-bold' },
-                    { val: '0.41', bg: 'bg-accent-cyan/40', text: 'text-white' }
-                  ]],
-                  ['GBP', [
-                    { val: '0.61', bg: 'bg-accent-cyan/60', text: 'text-surface font-bold' },
-                    { val: '0.74', bg: 'bg-accent-cyan/70', text: 'text-surface font-bold' },
-                    { val: '0.41', bg: 'bg-accent-cyan/40', text: 'text-white' },
-                    { val: '1.00', bg: 'bg-accent-cyan', text: 'text-surface font-bold' }
-                  ]]
-                ].map(([rowLabel, cells], i) => (
-                  <React.Fragment key={i}>
-                    <div className="h-10 flex items-center justify-end pr-4 font-mono font-bold text-slate-400 border-r border-surface-elevated">
-                      {rowLabel}
-                    </div>
-                    {cells.map((cell, j) => (
-                      <div key={j} className={`h-10 ${cell.bg} flex items-center justify-center font-mono ${cell.text} rounded`}>
-                        {cell.val}
-                      </div>
-                    ))}
-                  </React.Fragment>
-                ))}
+                {/* Row 1: USD */}
+                <div className="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-brand-midnight-border/50">USD</div>
+                <div className="h-12 bg-[#0891B2] flex items-center justify-center font-data-mono text-data-mono text-white font-bold rounded-sm">1.00</div>
+                <div className="h-12 bg-[#0891B2]/80 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.82</div>
+                <div className="h-12 bg-[#0891B2]/30 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.34</div>
+                <div className="h-12 bg-[#0891B2]/60 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.61</div>
+
+                {/* Row 2: EUR */}
+                <div className="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-brand-midnight-border/50">EUR</div>
+                <div className="h-12 bg-[#0891B2]/80 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.82</div>
+                <div className="h-12 bg-[#0891B2] flex items-center justify-center font-data-mono text-data-mono text-white font-bold rounded-sm">1.00</div>
+                <div className="h-12 bg-[#0891B2]/20 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.25</div>
+                <div className="h-12 bg-[#0891B2]/70 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.74</div>
+
+                {/* Row 3: JPY */}
+                <div className="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-brand-midnight-border/50">JPY</div>
+                <div className="h-12 bg-[#0891B2]/30 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.34</div>
+                <div className="h-12 bg-[#0891B2]/20 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.25</div>
+                <div className="h-12 bg-[#0891B2] flex items-center justify-center font-data-mono text-data-mono text-white font-bold rounded-sm">1.00</div>
+                <div className="h-12 bg-[#0891B2]/40 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.41</div>
+
+                {/* Row 4: GBP */}
+                <div className="h-12 flex items-center justify-end pr-4 font-data-mono text-data-mono font-bold text-on-surface-variant border-r border-brand-midnight-border/50">GBP</div>
+                <div className="h-12 bg-[#0891B2]/60 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.61</div>
+                <div className="h-12 bg-[#0891B2]/70 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.74</div>
+                <div className="h-12 bg-[#0891B2]/40 flex items-center justify-center font-data-mono text-data-mono text-white rounded-sm">0.41</div>
+                <div className="h-12 bg-[#0891B2] flex items-center justify-center font-data-mono text-data-mono text-white font-bold rounded-sm">1.00</div>
               </div>
             </div>
           </div>
-
         </div>
+
       </div>
     </div>
   );

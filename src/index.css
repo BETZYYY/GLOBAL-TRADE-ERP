@@ -2,6 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-brand-midnight-base text-[#d6e3ff] antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-brand-midnight-card border border-brand-midnight-border rounded-xl shadow-lg;
+  }
+  .bg-surface-elevated {
+    @apply bg-[#1c2a41];
+  }
+  .text-risk-high {
+    @apply text-brand-high-risk-text;
+  }
+  .bg-risk-high {
+    @apply bg-brand-high-risk-bg text-brand-high-risk-text;
+  }
+  .text-risk-medium {
+    @apply text-[#acedff];
+  }
+  .text-risk-low {
+    @apply text-brand-success-text;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-teal to-[#0E7490] hover:from-[#0E7490] hover:to-brand-teal text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-[0_4px_20px_rgba(8,145,178,0.35)];
+  }
+  .btn-secondary {
+    @apply bg-brand-midnight-card hover:bg-[#27354d] border border-brand-midnight-border text-[#d6e3ff] px-4 py-2 rounded-lg font-medium transition-all;
+  }
+  .btn-danger {
+    @apply bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 px-4 py-2 rounded-lg font-medium transition-all;
+  }
+  .input-field {
+    @apply w-full bg-brand-midnight-card border border-brand-midnight-border text-[#d6e3ff] px-4 py-2 rounded-lg focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal;
+  }
+  
+  /* Additional classes from stitch designs */
+  .ghost-border { border: 1px solid #1E3A5F; }
+  .teal-border { border: 1px solid #0891B2; }
+  .teal-focus:focus-within { border-color: #0891B2; box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2); }
+  .table-row-alt:nth-child(even) { background-color: #192E48; }
+
+  .card-border { border: 1px solid #1E3A5F; }
+  .focus-glow:focus { border-color: #0891B2; box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.3); outline: none; }
+
+  /* Credit risk specific */
+  .gauge-track {
+      fill: none;
+      stroke: #1E3A5F;
+      stroke-width: 12;
+      stroke-linecap: round;
+  }
+  .gauge-progress {
+      fill: none;
+      stroke: #0891B2;
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease-out;
+  }
+  .badge-low-risk { background-color: rgba(22, 163, 74, 0.1); color: #22C55E; border: 1px solid rgba(22, 163, 74, 0.3); }
+  .badge-med-risk { background-color: rgba(217, 119, 6, 0.1); color: #D97706; border: 1px solid rgba(217, 119, 6, 0.3); }
+  .badge-high-risk { background-color: rgba(220, 38, 38, 0.1); color: #DC2626; border: 1px solid rgba(220, 38, 38, 0.3); }
+
+  .chart-donut {
+      stroke-dasharray: 100 100;
+      stroke-width: 15;
+      fill: transparent;
+  }
+}
+
+@keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+}
+
+@keyframes needle-swing {
+    0% { transform: rotate(-90deg); }
+    100% { transform: rotate(50deg); }
+}
+.gauge-needle {
+    transform-origin: bottom center;
+    animation: needle-swing 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+.pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
 /* Custom Scrollbar for dense data tables */
 ::-webkit-scrollbar { 
   width: 6px; 

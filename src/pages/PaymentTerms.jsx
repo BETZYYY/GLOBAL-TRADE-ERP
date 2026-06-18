@@ -1,131 +1,283 @@
-import { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { colors, chartTheme } from '../tokens/design'
-import { Clock, Percent, FileText, TrendingDown } from 'lucide-react'
-import useCreditRisk from '../hooks/useCreditRisk'
-
-const mockAgingData = [
-  { bucket: 'Current', amount: 8400 }, { bucket: '1-30d',  amount: 3200 },
-  { bucket: '31-60d',  amount: 1800 }, { bucket: '61-90d', amount: 740 },
-  { bucket: '>90d',    amount: 320 },
-]
-
-const mockTerms = [
-  { counterparty: 'Bosch GmbH',          term: 'Net 30', discount: '2/10',   outstanding: '$1.24M', overdue: false, dso: 28 },
-  { counterparty: 'Toyota Motors',       term: 'Net 45', discount: '1/15',   outstanding: '$3.10M', overdue: false, dso: 41 },
-  { counterparty: 'Shell PLC',           term: 'Net 60', discount: '—',      outstanding: '$760K',  overdue: false, dso: 55 },
-  { counterparty: 'LVMH SA',             term: 'Net 30', discount: '2/10',   outstanding: '$2.10M', overdue: true,  dso: 48 },
-  { counterparty: 'Samsung Electronics', term: 'Net 60', discount: '1.5/20', outstanding: '$4.80M', overdue: false, dso: 58 },
-  { counterparty: 'Nestlé SA',           term: 'Net 45', discount: '2/10',   outstanding: '$430K',  overdue: false, dso: 32 },
-]
-
-const tooltipStyle = {
-  contentStyle: { background: colors.surface.elevated, border: `1px solid ${colors.border.subtle}`, borderRadius: 8, fontSize: 12 },
-  itemStyle:    { color: colors.text.primary },
-}
+import { useState } from 'react';
 
 export default function PaymentTerms() {
-  const { calculateScore } = useCreditRisk();
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    // Simulate API fetch since there's no full endpoint for this page
-    const timer = setTimeout(() => {
-      setData({
-        agingData: mockAgingData,
-        terms: mockTerms,
-        stats: { dso: '43.7d', overdue: 12, savings: '$84K', outstanding: '$12.4M' }
-      });
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[1,2,3,4].map(i => <div key={i} className="h-24 bg-surface-elevated rounded-xl"></div>)}
-        </div>
-        <div className="h-64 bg-surface-elevated rounded-xl"></div>
-        <div className="h-80 bg-surface-elevated rounded-xl"></div>
-      </div>
-    );
-  }
+  const [payMethod, setPayMethod] = useState('lc');
+  const [duration, setDuration] = useState('net60');
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Avg DSO',           value: data.stats.dso,  icon: Clock,       color: colors.accent.cyan },
-          { label: 'Overdue Invoices',  value: data.stats.overdue,     icon: FileText,    color: colors.risk.high },
-          { label: 'Early Pay Savings', value: data.stats.savings,   icon: Percent,     color: colors.risk.low },
-          { label: 'Total Outstanding', value: data.stats.outstanding, icon: TrendingDown,color: colors.risk.medium },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="card p-4 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="stat-label">{label}</span>
-              <Icon size={16} style={{ color }} />
-            </div>
-            <span className="stat-value">{value}</span>
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col min-h-screen bg-brand-midnight-base">
+      
+      {/* Breadcrumb & Title */}
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end w-full max-w-[1600px] mx-auto">
+        <div>
+          <div className="flex items-center text-on-surface-variant font-body text-sm mb-1 space-x-2">
+            <span className="hover:text-white cursor-pointer transition-colors">Payment Terms</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-white">Optimizer</span>
           </div>
-        ))}
-      </div>
-
-      <div className="card p-5">
-        <h2 className="text-sm font-semibold text-white mb-4">AR Aging Buckets ($K)</h2>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data.agingData} barSize={40}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridColor} vertical={false} />
-            <XAxis dataKey="bucket" tick={{ fill: chartTheme.axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: chartTheme.axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip {...tooltipStyle} />
-            <Bar dataKey="amount" name="AR ($K)" fill={colors.accent.teal} radius={[4,4,0,0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="card overflow-hidden">
-        <div className="px-5 py-4 border-b border-surface-elevated">
-          <h2 className="text-sm font-semibold text-white">Counterparty Payment Terms</h2>
+          <h1 className="font-h1 text-h1 text-white">Payment Term Optimizer</h1>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-surface-elevated text-left">
-              {['Counterparty','Terms','Early Pay Disc.','Outstanding','DSO','Status'].map(h => (
-                <th key={h} className="px-5 py-3 stat-label">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-elevated">
-            {data.terms.map(t => (
-              <tr key={t.counterparty} className="hover:bg-surface-elevated/40 transition-colors">
-                <td className="px-5 py-3 font-medium text-white">{t.counterparty}</td>
-                <td className="px-5 py-3 text-slate-400">{t.term}</td>
-                <td className="px-5 py-3 text-slate-400 font-mono text-xs">{t.discount}</td>
-                <td className="px-5 py-3 text-slate-300 tabular-nums">{t.outstanding}</td>
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-surface-elevated rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${t.dso > 45 ? 'bg-risk-high' : t.dso > 30 ? 'bg-risk-medium' : 'bg-risk-low'}`}
-                        style={{ width: `${Math.min(100, (t.dso / 90) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-slate-400 tabular-nums">{t.dso}d</span>
+      </div>
+
+      {/* 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1600px] mx-auto w-full">
+        
+        {/* Left Column: Input Form (38% roughly ~ 5 columns) */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="bg-brand-midnight-card ghost-border rounded-xl p-6 flex flex-col">
+            <div className="border-b border-brand-midnight-border pb-3 mb-5">
+              <h2 className="font-h3-caps text-h3-caps text-on-surface-variant">PARTNER DETAILS</h2>
+            </div>
+            
+            <div className="space-y-5">
+              {/* Company Name */}
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Company Name</label>
+                <input 
+                  className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-body text-body outline-none focus:border-brand-teal" 
+                  readOnly 
+                  type="text" 
+                  value="Tanaka Trading Co., Ltd."
+                />
+              </div>
+
+              {/* Partner Country & Transaction Value Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Partner Country</label>
+                  <div className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-body text-body flex items-center">
+                    <span className="mr-2 text-lg leading-none">🇯🇵</span> Japan
                   </div>
-                </td>
-                <td className="px-5 py-3">
-                  <span className={t.overdue ? 'badge-risk-high' : 'badge-risk-low'}>
-                    {t.overdue ? 'overdue' : 'current'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                <div>
+                  <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Transaction Value</label>
+                  <input 
+                    className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-data-mono text-data-mono text-right outline-none focus:border-brand-teal" 
+                    readOnly 
+                    type="text" 
+                    value="150,000 USD"
+                  />
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-2">Current Payment Method</label>
+                <div className="space-y-2">
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'lc' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                    <input 
+                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      name="pay_method" 
+                      type="radio"
+                      checked={payMethod === 'lc'}
+                      onChange={() => setPayMethod('lc')}
+                    />
+                    <span className="ml-3 font-body text-body text-white">Letter of Credit (LC)</span>
+                  </label>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'open' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                    <input 
+                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      name="pay_method" 
+                      type="radio"
+                      checked={payMethod === 'open'}
+                      onChange={() => setPayMethod('open')}
+                    />
+                    <span className="ml-3 font-body text-body text-on-surface-variant">Open Account</span>
+                  </label>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'doc' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                    <input 
+                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      name="pay_method" 
+                      type="radio"
+                      checked={payMethod === 'doc'}
+                      onChange={() => setPayMethod('doc')}
+                    />
+                    <span className="ml-3 font-body text-body text-on-surface-variant">Documentary Collection</span>
+                  </label>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'cash' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                    <input 
+                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      name="pay_method" 
+                      type="radio"
+                      checked={payMethod === 'cash'}
+                      onChange={() => setPayMethod('cash')}
+                    />
+                    <span className="ml-3 font-body text-body text-on-surface-variant">Cash in Advance</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Preferred Duration */}
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-2">Target Duration</label>
+                <div className="flex p-1 bg-[#0F1B2D] border border-brand-midnight-border rounded-lg">
+                  <button 
+                    onClick={() => setDuration('net30')}
+                    className={`flex-1 py-1.5 text-center font-data-mono text-[12px] rounded-md transition-colors ${duration === 'net30' ? 'bg-[#16243B] text-brand-teal border border-brand-midnight-border shadow-sm' : 'text-on-surface-variant hover:text-white'}`}
+                  >
+                    Net 30
+                  </button>
+                  <button 
+                    onClick={() => setDuration('net60')}
+                    className={`flex-1 py-1.5 text-center font-data-mono text-[12px] rounded-md transition-colors ${duration === 'net60' ? 'bg-[#16243B] text-brand-teal border border-brand-midnight-border shadow-sm' : 'text-on-surface-variant hover:text-white'}`}
+                  >
+                    Net 60
+                  </button>
+                  <button 
+                    onClick={() => setDuration('net90')}
+                    className={`flex-1 py-1.5 text-center font-data-mono text-[12px] rounded-md transition-colors ${duration === 'net90' ? 'bg-[#16243B] text-brand-teal border border-brand-midnight-border shadow-sm' : 'text-on-surface-variant hover:text-white'}`}
+                  >
+                    Net 90
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="mt-8">
+              <button className="w-full h-button_height bg-brand-teal text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#067c9c] transition-colors focus-glow group relative overflow-hidden">
+                <span className="relative z-10 flex items-center">
+                  <span className="material-symbols-outlined mr-2 text-[18px]">model_training</span>
+                  Optimize Payment Term
+                </span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right Column: Results (62% roughly ~ 7 columns) */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-h2 text-h2 text-white">Recommendation Results</h2>
+            <div className="px-2.5 py-1 rounded bg-[#16A34A]/10 border border-[#16A34A] flex items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] mr-2 shadow-[0_0_4px_#22C55E]"></span>
+              <span className="font-h3-caps text-[10px] font-bold text-[#22C55E] tracking-wider">JAPAN · LOW RISK</span>
+            </div>
+          </div>
+
+          {/* Card A: Recommended */}
+          <div className="bg-gradient-to-br from-[#16243B] to-[#0F1B2D] border border-brand-teal/40 rounded-xl p-5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute top-0 right-0 bg-brand-teal text-[#0F1B2D] font-h3-caps text-[9px] px-3 py-1 rounded-bl-lg font-bold flex items-center shadow-[0_0_10px_rgba(8,145,178,0.3)]">
+              <span className="material-symbols-outlined text-[12px] mr-1">verified</span> RECOMMENDED
+            </div>
+            
+            <div className="flex justify-between items-start mb-4 pr-24 relative z-10">
+              <div>
+                <div className="flex items-end gap-3 mb-1">
+                  <span className="font-data-mono text-xl font-bold text-white">Net 30</span>
+                  <span className="text-on-surface-variant font-body">—</span>
+                  <span className="font-body font-medium text-white">Letter of Credit (LC)</span>
+                </div>
+                <div className="text-xs text-on-surface-variant font-body mt-1">Optimal balance of security and cash flow</div>
+              </div>
+              <div className="text-right">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase">Cash Flow Impact</div>
+                <div className="font-data-mono text-lg text-[#22C55E] font-medium">+$2,100 <span className="text-xs text-on-surface-variant font-body">saved</span></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6 items-center relative z-10">
+              <div className="col-span-4">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="font-label-xs text-label-xs text-on-surface-variant">Risk Exposure</span>
+                  <span className="font-data-mono text-[11px] text-brand-teal">28%</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#0F1B2D] rounded-full overflow-hidden border border-brand-midnight-border">
+                  <div className="h-full bg-brand-teal rounded-full relative shadow-[0_0_8px_rgba(8,145,178,0.5)]" style={{ width: '28%' }}></div>
+                </div>
+              </div>
+              <div className="col-span-8 border-l border-brand-midnight-border pl-6 py-1">
+                <p className="text-sm font-body text-on-surface-variant leading-relaxed italic">
+                  "Japan shows stable payment behavior. LC at Net 30 mitigates FX volatility risk while securing working capital ahead of regional average."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card B */}
+          <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 hover:border-outline-variant transition-colors group cursor-default">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <div className="flex items-end gap-3 mb-1">
+                  <span className="font-data-mono text-lg font-medium text-white">Net 60</span>
+                  <span className="text-on-surface-variant font-body">—</span>
+                  <span className="font-body text-white">Open Account</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase">Cash Flow Impact</div>
+                <div className="font-data-mono text-[15px] text-[#F87171]">-$800 <span className="text-[11px] text-on-surface-variant font-body">cost</span></div>
+              </div>
+            </div>
+            <div className="w-1/3">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="font-label-xs text-label-xs text-on-surface-variant">Risk Exposure</span>
+                <span className="font-data-mono text-[11px] text-[#F59E0B]">41%</span>
+              </div>
+              <div className="h-1.5 w-full bg-[#0F1B2D] rounded-full overflow-hidden border border-brand-midnight-border">
+                <div className="h-full bg-[#F59E0B] rounded-full opacity-80" style={{ width: '41%' }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card C */}
+          <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 hover:border-outline-variant transition-colors group cursor-default">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <div className="flex items-end gap-3 mb-1">
+                  <span className="font-data-mono text-lg font-medium text-white">Net 90</span>
+                  <span className="text-on-surface-variant font-body">—</span>
+                  <span className="font-body text-white">Doc. Collection</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase">Cash Flow Impact</div>
+                <div className="font-data-mono text-[15px] text-[#F87171]">-$2,400 <span className="text-[11px] text-on-surface-variant font-body">cost</span></div>
+              </div>
+            </div>
+            <div className="w-1/3">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="font-label-xs text-label-xs text-on-surface-variant">Risk Exposure</span>
+                <span className="font-data-mono text-[11px] text-[#F59E0B]">55%</span>
+              </div>
+              <div className="h-1.5 w-full bg-[#0F1B2D] rounded-full overflow-hidden border border-brand-midnight-border">
+                <div className="h-full bg-[#F59E0B] rounded-full opacity-80" style={{ width: '55%' }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mini Country Profile Footer */}
+          <div className="mt-auto pt-4 border-t border-brand-midnight-border">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant mb-3 flex items-center">
+              <span className="material-symbols-outlined text-[14px] mr-1.5">public</span>
+              JAPAN COUNTRY PROFILE
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Sovereign Rating</div>
+                <div className="font-data-mono text-[15px] font-bold text-white flex items-center">
+                  A+ <span className="ml-2 text-[10px] text-[#22C55E] flex items-center"><span className="material-symbols-outlined text-[12px]">trending_up</span></span>
+                </div>
+              </div>
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Payment History</div>
+                <div className="font-body text-sm font-medium text-white">Excellent</div>
+              </div>
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Currency Stability</div>
+                <div className="font-body text-sm font-medium text-white flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-brand-teal mr-2"></span> Low Volatility
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
-  )
+  );
 }

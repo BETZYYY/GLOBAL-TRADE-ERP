@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  TrendingUp,
-  AlertTriangle,
-  ShieldCheck,
-  Clock,
-  ArrowUpRight,
-  ArrowDownLeft,
-  Bell,
-  RefreshCcw
-} from 'lucide-react';
 import useAuthStore from '../stores/authStore';
 import useDashboard from '../hooks/useDashboard';
 import useSocket from '../hooks/useSocket';
@@ -43,15 +33,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!socket) return;
-
     const handleNewAlert = (alert) => {
-      setLocalAlerts(prev => [alert, ...prev].slice(0, 10)); // Keep latest 10
+      setLocalAlerts(prev => [alert, ...prev].slice(0, 10));
     };
-
-    const handleRateUpdate = (rates) => {
-      setLastUpdate(new Date());
-      // In a full chart implementation, we'd update chart data state here
-    };
+    const handleRateUpdate = () => setLastUpdate(new Date());
 
     socket.on('new_alert', handleNewAlert);
     socket.on('rate_updated', handleRateUpdate);
@@ -64,28 +49,12 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="h-8 bg-surface-elevated rounded w-64 mb-2"></div>
-            <div className="h-4 bg-surface-elevated rounded w-48"></div>
-          </div>
-          <div className="h-10 bg-surface-elevated rounded w-40"></div>
-        </div>
+      <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-4 max-w-full animate-pulse">
+        <div className="h-8 bg-surface-elevated rounded w-64 mb-2"></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1,2,3,4].map(i => (
-            <div key={i} className="card p-5 flex items-center gap-4">
-              <div className="w-12 h-12 bg-surface-elevated rounded-xl"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-surface-elevated rounded w-24"></div>
-                <div className="h-6 bg-surface-elevated rounded w-16"></div>
-              </div>
-            </div>
+            <div key={i} className="bg-brand-midnight-card ghost-border rounded-xl p-5 h-24"></div>
           ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 card p-5 h-64 bg-surface-elevated"></div>
-          <div className="card p-5 h-64 bg-surface-elevated"></div>
         </div>
       </div>
     );
@@ -93,150 +62,121 @@ export default function Dashboard() {
 
   if (error || !data) {
     return (
-      <div className="card p-8 flex flex-col items-center justify-center text-center">
-        <AlertTriangle className="text-risk-high mb-4" size={48} />
-        <h2 className="text-xl font-bold text-white mb-2">Failed to Load Dashboard</h2>
-        <p className="text-slate-400 mb-6">There was an error communicating with the server.</p>
-        <button onClick={fetchSummary} className="btn-primary">Try Again</button>
+      <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col">
+        <div className="bg-brand-midnight-card ghost-border rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <span className="material-symbols-outlined text-[48px] text-[#DC2626] mb-4">warning</span>
+          <h2 className="font-h2 text-h2 text-white mb-2">Failed to Load Dashboard</h2>
+          <button onClick={fetchSummary} className="btn-primary mt-4">Try Again</button>
+        </div>
       </div>
     );
   }
 
-  const kpis = [
-    {
-      title: 'Total Eksposur (USD)',
-      value: formatCur(data.total_exposure_usd),
-      icon: TrendingUp,
-      color: 'text-accent-cyan',
-      bg: 'bg-accent-cyan/10',
-    },
-    {
-      title: 'Hedging Coverage',
-      value: `${data.hedging_coverage_pct}%`,
-      icon: ShieldCheck,
-      color: 'text-risk-low',
-      bg: 'bg-risk-low/10',
-    },
-    {
-      title: 'Pending Approvals',
-      value: data.pending_approvals_count,
-      icon: Clock,
-      color: 'text-risk-medium',
-      bg: 'bg-risk-medium/10',
-    },
-    {
-      title: 'Risiko Tinggi (30hr)',
-      value: data.high_risk_count,
-      icon: AlertTriangle,
-      color: 'text-risk-high',
-      bg: 'bg-risk-high/10',
-    },
-  ];
+  const { total_exposure, hedging_coverage, pending_approvals, high_risk_transactions } = data;
 
   return (
-    <div className="space-y-6">
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-end justify-between">
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-4 max-w-full">
+      {/* Page Header */}
+      <div className="flex justify-between items-center w-full">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">
-            Selamat datang, {user?.nama?.split(' ')[0]}
-          </h1>
-          <div className="flex items-center gap-2">
-            <p className="text-slate-400 text-sm">
-              Ringkasan posisi keuangan dan risiko hari ini.
-            </p>
-            <span className="flex items-center gap-1 text-[10px] text-accent-cyan bg-accent-cyan/10 px-2 py-0.5 rounded border border-accent-cyan/20 ml-2">
-              <RefreshCcw size={10} className="animate-spin-slow" /> Updated {Math.floor((new Date() - lastUpdate) / 1000)}s ago
+          <h1 className="font-h1 text-h1 text-on-surface m-0">Dashboard Overview</h1>
+          <p className="font-label-xs text-label-xs text-on-surface-variant mt-1">
+            Ringkasan posisi keuangan dan risiko hari ini. 
+            <span className="ml-2 px-2 py-0.5 rounded ghost-border bg-surface-elevated text-[10px]">
+              <span className="material-symbols-outlined text-[10px] align-middle mr-1">update</span>
+              Updated {Math.round((new Date() - lastUpdate)/1000)}s ago
             </span>
-          </div>
+          </p>
         </div>
-        <Link to="/transactions" className="btn-primary">
-          + Buat Transaksi Baru
-        </Link>
+        <div>
+          <button className="h-button_height bg-transparent border border-outline-variant text-on-surface-variant px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-surface-variant/50 transition-colors cursor-pointer">
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            Export Report
+          </button>
+        </div>
       </div>
 
-      {/* ── KPI Grid ────────────────────────────────────────────────────────── */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi, idx) => (
-          <div key={idx} className="card p-5 flex items-center gap-4 border border-surface-elevated hover:border-surface-highlight transition-colors">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-              <kpi.icon className={kpi.color} size={24} />
-            </div>
-            <div>
-              <p className="stat-label mb-1">{kpi.title}</p>
-              <h3 className="text-2xl font-bold text-white tracking-tight">{kpi.value}</h3>
-            </div>
+        {/* Exposure */}
+        <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 flex flex-col justify-between hover:border-brand-teal transition-colors">
+          <div className="flex justify-between items-start">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Total Eksposur (USD)</h3>
+            <span className="material-symbols-outlined text-brand-teal">trending_up</span>
           </div>
-        ))}
+          <div className="mt-4">
+            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{formatCur(total_exposure)}</div>
+          </div>
+        </div>
+        
+        {/* Hedging */}
+        <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 flex flex-col justify-between hover:border-brand-teal transition-colors">
+          <div className="flex justify-between items-start">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Hedging Coverage</h3>
+            <span className="material-symbols-outlined text-[#22C55E]">security</span>
+          </div>
+          <div className="mt-4">
+            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{Math.round(hedging_coverage || 0)}%</div>
+          </div>
+        </div>
+
+        {/* Pending */}
+        <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 flex flex-col justify-between hover:border-brand-teal transition-colors">
+          <div className="flex justify-between items-start">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Pending Approvals</h3>
+            <span className="material-symbols-outlined text-[#F59E0B]">schedule</span>
+          </div>
+          <div className="mt-4">
+            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{pending_approvals}</div>
+          </div>
+        </div>
+
+        {/* High Risk */}
+        <div className="bg-brand-midnight-card ghost-border rounded-xl p-5 flex flex-col justify-between hover:border-brand-teal transition-colors">
+          <div className="flex justify-between items-start">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase">Risiko Tinggi (30hr)</h3>
+            <span className="material-symbols-outlined text-[#DC2626]">warning</span>
+          </div>
+          <div className="mt-4">
+            <div className="font-h1 text-[28px] font-bold text-[#DC2626] tracking-tight">{high_risk_transactions}</div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Main Content (Left) ───────────────────────────────────────────── */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Top Currencies */}
-          <div className="card p-5">
-            <h3 className="text-white font-medium mb-4">Volume Mata Uang (30 Hari)</h3>
-            <div className="space-y-4">
-              {data.top_currencies_30d?.map((c, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center text-xs font-bold text-white">
-                      {c.mata_uang_asal}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-white">{c.jumlah_transaksi} Transaksi</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-mono text-white">
-                      {new Intl.NumberFormat('en-US', { notation: 'compact' }).format(c.total_volume)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {(!data.top_currencies_30d || data.top_currencies_30d.length === 0) && (
-                <p className="text-slate-500 text-sm">Belum ada data transaksi.</p>
-              )}
-            </div>
+        {/* Main Chart Area */}
+        <div className="lg:col-span-2 bg-brand-midnight-card ghost-border rounded-xl flex flex-col min-h-[400px] p-5">
+          <h2 className="font-h2 text-h2 text-on-surface m-0 mb-4">Live Exchange Rates (USD/IDR)</h2>
+          <div className="flex-1 border border-outline-variant/30 rounded flex items-center justify-center">
+            <span className="text-on-surface-variant font-label-xs">Chart Visualization Placeholder</span>
           </div>
-
         </div>
 
-        {/* ── Sidebar (Right) ───────────────────────────────────────────────── */}
-        <div className="space-y-6">
-          
-          {/* Peringatan Risiko */}
-          <div className="card p-5 border border-risk-high/20 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-risk-high"></div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-medium flex items-center gap-2">
-                <Bell size={16} className="text-risk-high" /> Peringatan Aktif
-              </h3>
-            </div>
-            
-            <div className="space-y-3">
-              {localAlerts?.map((alert) => (
-                <div key={alert.id_peringatan} className="p-3 bg-surface-elevated/50 rounded-lg border border-surface-highlight">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-xs font-bold text-risk-high uppercase">
-                      {alert.level_keparahan}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {new Date(alert.timestamp_peringatan || alert.tanggal_dibuat).toLocaleDateString('id-ID')}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-300 leading-snug">
-                    {alert.pesan_peringatan}
-                  </p>
-                </div>
-              ))}
-              {localAlerts.length === 0 && (
-                <p className="text-slate-500 text-sm text-center py-4">Semua aman. Tidak ada peringatan.</p>
-              )}
-            </div>
+        {/* Alerts Panel */}
+        <div className="bg-brand-midnight-card ghost-border rounded-xl flex flex-col min-h-[400px]">
+          <div className="px-4 py-3 border-b border-brand-midnight-border flex justify-between items-center">
+            <h2 className="font-h2 text-h2 text-on-surface m-0 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">notifications_active</span>
+              Risk Alerts
+            </h2>
           </div>
-
+          <div className="flex-1 overflow-auto p-4 space-y-3">
+            {localAlerts.length === 0 ? (
+              <p className="text-center text-on-surface-variant font-label-xs mt-10">Belum ada peringatan baru.</p>
+            ) : (
+              localAlerts.map(alert => (
+                <div key={alert.id_peringatan} className={`p-3 rounded-lg border ${alert.tingkat_keparahan === 'kritis' ? 'bg-[#DC2626]/10 border-[#DC2626]/30' : 'bg-[#F59E0B]/10 border-[#F59E0B]/30'}`}>
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`text-[10px] font-bold uppercase ${alert.tingkat_keparahan === 'kritis' ? 'text-[#DC2626]' : 'text-[#F59E0B]'}`}>
+                      {alert.tingkat_keparahan}
+                    </span>
+                    <span className="text-[10px] text-on-surface-variant">{new Date(alert.timestamp_dibuat).toLocaleDateString()}</span>
+                  </div>
+                  <p className="font-body text-body text-white text-sm">{alert.pesan_peringatan}</p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
