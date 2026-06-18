@@ -28,7 +28,7 @@
     @apply text-brand-success-text;
   }
   .btn-primary {
-    @apply bg-gradient-to-r from-brand-teal to-[#0E7490] hover:from-[#0E7490] hover:to-brand-teal text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-[0_4px_20px_rgba(8,145,178,0.35)];
+    @apply bg-brand-teal hover:bg-[#0E7490] text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-[0_4px_20px_rgba(8,145,178,0.35)];
   }
   .btn-secondary {
     @apply bg-brand-midnight-card hover:bg-[#27354d] border border-brand-midnight-border text-[#d6e3ff] px-4 py-2 rounded-lg font-medium transition-all;
@@ -38,6 +38,29 @@
   }
   .input-field {
     @apply w-full bg-brand-midnight-card border border-brand-midnight-border text-[#d6e3ff] px-4 py-2 rounded-lg focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal;
+  }
+
+  .custom-radio {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #1E3A5F;
+    background: #0F1B2D;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .custom-radio:checked {
+    border-color: #0891B2;
+    background: #0891B2;
+  }
+  .custom-radio:checked::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
   }
   
   /* Additional classes from stitch designs */

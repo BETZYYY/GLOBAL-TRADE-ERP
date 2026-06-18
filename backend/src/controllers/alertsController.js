@@ -34,7 +34,7 @@ async function list(req, res, next) {
       [req.user.id, parseInt(limit, 10), (parseInt(page, 10) - 1) * parseInt(limit, 10)]
     );
 
-    return ok(res, rows, 'Berhasil', 200,
+    return ok(res, rows, 'Success', 200,
       { page: +page, limit: +limit, total, totalPages: Math.ceil(total / limit) }
     );
   } catch (err) { next(err); }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import useCreditRisk from '../hooks/useCreditRisk';
 
 export default function CreditRisk() {
-  const { data, loading, scoreEntity } = useCreditRisk();
+  const { data, loading, calculateScore } = useCreditRisk();
   const [entityName, setEntityName] = useState('Tanaka Trading');
   const [jurisdiction, setJurisdiction] = useState('Japan');
   const [sector, setSector] = useState('Manufacturing');
@@ -12,15 +12,15 @@ export default function CreditRisk() {
   // to show the assessment if data exists, otherwise show a placeholder or default UI.
 
   const handleCalculate = () => {
-    scoreEntity({ name: entityName, jurisdiction, sector, hasFinancials });
+    calculateScore({ name: entityName, jurisdiction, sector, hasFinancials });
   };
 
   // If we just loaded the page and there's no data, let's auto-calculate for the mock UI feeling
   useEffect(() => {
     if (!data && !loading) {
-      scoreEntity({ name: 'Tanaka Trading', jurisdiction: 'Japan', sector: 'Manufacturing', hasFinancials: true });
+      calculateScore({ name: 'Tanaka Trading', jurisdiction: 'Japan', sector: 'Manufacturing', hasFinancials: true });
     }
-  }, [data, loading, scoreEntity]);
+  }, []); // run once on mount only
 
   const score = data?.skor_kredit || 72;
   const rating = data?.rating || 'A-';
@@ -33,7 +33,7 @@ export default function CreditRisk() {
   const progressOffset = 471 - ((score / 100) * 471);
 
   return (
-    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 w-full max-w-[1600px] mx-auto">
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full">
       {/* Page Header */}
       <div className="flex justify-between items-end w-full">
         <div>
@@ -55,17 +55,17 @@ export default function CreditRisk() {
         {/* LEFT COLUMN (38% ~ Col Span 5) */}
         <div className="col-span-12 lg:col-span-5 flex flex-col gap-6">
           {/* Partner Assessment Card */}
-          <div className="bg-brand-midnight-card rounded-xl card-border flex flex-col">
-            <div className="p-4 border-b border-brand-midnight-border flex justify-between items-center">
+          <div className="bg-[#16243B] rounded-xl border border-[#1E3A5F] flex flex-col">
+            <div className="p-4 border-b border-[#1E3A5F] flex justify-between items-center">
               <h2 className="font-h2 text-h2 text-white">Partner Assessment</h2>
-              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-brand-teal">more_horiz</span>
+              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-[#0891B2]">more_horiz</span>
             </div>
             <div className="p-4 flex flex-col gap-4">
               {/* Company Info Fields */}
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex flex-col gap-1 group">
                   <label className="font-label-xs text-label-xs text-on-surface-variant uppercase">Entity Name</label>
-                  <div className="bg-brand-midnight-base ghost-border rounded-md px-3 py-2 flex items-center group-focus-within:border-brand-teal transition-colors">
+                  <div className="bg-[#0F1B2D] border border-[#1E3A5F] rounded-md px-3 py-2 flex items-center focus-within:border-[#0891B2] transition-colors">
                     <span className="material-symbols-outlined text-on-surface-variant mr-2 text-sm">domain</span>
                     <input 
                       className="bg-transparent border-none text-white text-sm p-0 w-full focus:ring-0 font-medium outline-none" 
@@ -79,7 +79,7 @@ export default function CreditRisk() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1 group">
                     <label className="font-label-xs text-label-xs text-on-surface-variant uppercase">Jurisdiction</label>
-                    <div className="bg-brand-midnight-base ghost-border rounded-md px-3 py-2 flex items-center group-focus-within:border-brand-teal transition-colors">
+                    <div className="bg-[#0F1B2D] border border-[#1E3A5F] rounded-md px-3 py-2 flex items-center focus-within:border-[#0891B2] transition-colors">
                       <span className="material-symbols-outlined text-on-surface-variant mr-2 text-sm">public</span>
                       <input 
                         className="bg-transparent border-none text-white text-sm p-0 w-full focus:ring-0 outline-none" 
@@ -91,7 +91,7 @@ export default function CreditRisk() {
                   </div>
                   <div className="flex flex-col gap-1 group">
                     <label className="font-label-xs text-label-xs text-on-surface-variant uppercase">Sector</label>
-                    <div className="bg-brand-midnight-base ghost-border rounded-md px-3 py-2 flex items-center group-focus-within:border-brand-teal transition-colors">
+                    <div className="bg-[#0F1B2D] border border-[#1E3A5F] rounded-md px-3 py-2 flex items-center focus-within:border-[#0891B2] transition-colors">
                       <span className="material-symbols-outlined text-on-surface-variant mr-2 text-sm">factory</span>
                       <input 
                         className="bg-transparent border-none text-white text-sm p-0 w-full focus:ring-0 outline-none" 
@@ -105,9 +105,9 @@ export default function CreditRisk() {
               </div>
 
               {/* Financial Statement Toggle */}
-              <div className="flex items-center justify-between p-3 bg-brand-midnight-base ghost-border rounded-md mt-2">
+              <div className="flex items-center justify-between p-3 bg-[#0F1B2D] border border-[#1E3A5F] rounded-md mt-2">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-brand-teal">description</span>
+                  <span className="material-symbols-outlined text-[#0891B2]">description</span>
                   <div>
                     <p className="text-sm font-medium text-white">Q3 Financials Attached</p>
                     <p className="text-xs text-on-surface-variant font-data-mono">audited_stmt_Q3.pdf</p>
@@ -129,7 +129,7 @@ export default function CreditRisk() {
               <button 
                 onClick={handleCalculate}
                 disabled={loading}
-                className="mt-4 bg-brand-teal text-white font-medium text-sm rounded-md h-button_height hover:bg-[#067a96] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                className="mt-4 bg-[#0891B2] text-white font-medium text-sm rounded-md h-button_height hover:bg-[#067a96] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 w-full cursor-pointer"
               >
                 {loading ? (
                   <span className="material-symbols-outlined text-sm animate-spin">sync</span>
@@ -142,10 +142,10 @@ export default function CreditRisk() {
           </div>
 
           {/* Recent Assessments List */}
-          <div className="bg-brand-midnight-card rounded-xl card-border flex-1 flex flex-col min-h-[300px]">
-            <div className="p-4 border-b border-brand-midnight-border flex justify-between items-center">
+          <div className="bg-[#16243B] rounded-xl border border-[#1E3A5F] flex-1 flex flex-col min-h-[300px]">
+            <div className="p-4 border-b border-[#1E3A5F] flex justify-between items-center">
               <h2 className="font-h2 text-h2 text-white">Recent Assessments</h2>
-              <button className="text-xs text-brand-teal hover:underline">View All</button>
+              <button className="text-xs text-[#0891B2] hover:underline cursor-pointer">View All</button>
             </div>
             <div className="flex flex-col">
               {/* Row 1 */}
@@ -161,7 +161,7 @@ export default function CreditRisk() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-data-mono text-sm text-white">84</span>
-                  <span className="badge-low-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Low Risk</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A]">Low Risk</span>
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export default function CreditRisk() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-data-mono text-sm text-white">45</span>
-                  <span className="badge-med-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Med Risk</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide bg-[#B45309]/20 text-[#F59E0B] border border-[#B45309]">Med Risk</span>
                 </div>
               </div>
 
@@ -195,7 +195,7 @@ export default function CreditRisk() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-data-mono text-sm text-white">12</span>
-                  <span className="badge-high-risk text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">High Risk</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]">High Risk</span>
                 </div>
               </div>
             </div>
@@ -205,15 +205,15 @@ export default function CreditRisk() {
         {/* RIGHT COLUMN (62% ~ Col Span 7) */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-6">
           {/* Score Results Area */}
-          <div className="grid grid-cols-2 gap-6 h-full">
+          <div className="grid grid-cols-2 gap-6">
             {/* Large Gauge Card */}
-            <div className="col-span-2 bg-brand-midnight-card rounded-xl card-border flex flex-col relative overflow-hidden">
+            <div className="bg-[#16243B] rounded-xl border border-[#1E3A5F] flex flex-col relative overflow-hidden">
               {/* Decorative background glow */}
               <div className="absolute top-[-50px] left-1/2 -translate-x-1/2 w-64 h-64 bg-brand-teal opacity-[0.05] rounded-full blur-3xl pointer-events-none"></div>
               
-              <div className="p-4 border-b border-brand-midnight-border flex justify-between items-center z-10 bg-[#1E2D44]/30">
+              <div className="p-4 border-b border-[#1E3A5F] flex justify-between items-center z-10 bg-[#1E2D44]/30">
                 <h2 className="font-h2 text-h2 text-white flex items-center gap-2">
-                  <span className="material-symbols-outlined text-brand-teal">speed</span>
+                  <span className="material-symbols-outlined text-[#0891B2]">speed</span>
                   Assessment Result
                 </h2>
                 <span className="text-xs text-on-surface-variant font-data-mono">ID: TNK-2023-Q4</span>
@@ -224,11 +224,17 @@ export default function CreditRisk() {
                 <div className="gauge-container mb-4">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 240 240">
                     <circle className="gauge-track" cx="120" cy="120" r="100" strokeDasharray="471 628" strokeDashoffset="-78"></circle>
-                    <circle className="gauge-progress" cx="120" cy="120" r="100" strokeDasharray="471 628" strokeDashoffset={progressOffset} style={{ transition: 'stroke-dashoffset 1s ease-out' }}></circle>
+                    <circle className="gauge-progress" cx="120" cy="120" r="100" strokeDasharray="471 628" strokeDashoffset={progressOffset} style={{ transition: 'stroke-dashoffset 1s ease-out', stroke: score >= 71 ? '#16A34A' : score >= 41 ? '#D97706' : '#DC2626' }}></circle>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="font-data-mono text-[56px] font-bold text-white leading-none tracking-tighter">{score}</span>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded mt-2 uppercase tracking-widest ${score >= 70 ? 'badge-low-risk' : score >= 40 ? 'badge-med-risk' : 'badge-high-risk'}`}>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded mt-2 uppercase tracking-widest ${
+                      score >= 70 
+                        ? 'bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A]' 
+                        : score >= 40 
+                        ? 'bg-[#B45309]/20 text-[#F59E0B] border border-[#B45309]' 
+                        : 'bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]'
+                    }`}>
                       {score >= 70 ? 'Low Risk' : score >= 40 ? 'Med Risk' : 'High Risk'}
                     </span>
                   </div>
@@ -245,7 +251,7 @@ export default function CreditRisk() {
             </div>
 
             {/* Metric Card 1 */}
-            <div className="col-span-1 bg-brand-midnight-card rounded-xl card-border p-4 flex flex-col justify-between">
+            <div className="col-span-1 bg-[#16243B] rounded-xl border border-[#1E3A5F] p-4 flex flex-col justify-between">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-full bg-brand-midnight-base ghost-border flex items-center justify-center">
                   <span className="material-symbols-outlined text-[14px] text-brand-teal">account_balance</span>
@@ -262,7 +268,7 @@ export default function CreditRisk() {
             </div>
 
             {/* Metric Card 2 */}
-            <div className="col-span-1 bg-brand-midnight-card rounded-xl card-border p-4 flex flex-col justify-between">
+            <div className="col-span-1 bg-[#16243B] rounded-xl border border-[#1E3A5F] p-4 flex flex-col justify-between">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-full bg-brand-midnight-base ghost-border flex items-center justify-center">
                   <span className="material-symbols-outlined text-[14px] text-[#F59E0B]">warning</span>
@@ -280,6 +286,53 @@ export default function CreditRisk() {
               </div>
             </div>
 
+          </div>
+
+          {/* Risk Factors Analysis Card */}
+          <div className="bg-[#16243B] rounded-xl border border-[#1E3A5F] p-5">
+            <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase mb-4">Risk Factors</h3>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span className="text-white">Payment History</span>
+                  <span className="font-data-mono text-white">92/100</span>
+                </div>
+                <div className="w-full bg-[#1E3A5F] rounded-full h-1.5">
+                  <div className="bg-[#16A34A] h-1.5 rounded-full" style={{ width: '92%' }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span className="text-white">Leverage Ratio</span>
+                  <span className="font-data-mono text-white">65/100</span>
+                </div>
+                <div className="w-full bg-[#1E3A5F] rounded-full h-1.5">
+                  <div className="bg-[#0891B2] h-1.5 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span className="text-white">Market Stability</span>
+                  <span className="font-data-mono text-white">78/100</span>
+                </div>
+                <div className="w-full bg-[#1E3A5F] rounded-full h-1.5">
+                  <div className="bg-[#16A34A] h-1.5 rounded-full" style={{ width: '78%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* System Recommendation Box */}
+          <div className="bg-[#0891B2]/10 border border-[#0891B2] rounded-lg p-4 flex gap-3">
+            <span className="material-symbols-outlined text-[#0891B2] shrink-0">lightbulb</span>
+            <div className="flex flex-col gap-1">
+              <span className="font-h3-caps text-h3-caps text-[#0891B2] uppercase mb-1">Recommendation</span>
+              <p className="text-sm text-white leading-relaxed">
+                Approve credit line up to $300,000 USD.<br/>
+                Standard payment terms applicable (Net 30–60).<br/>
+                No additional collateral required below $100,000.
+              </p>
+            </div>
           </div>
         </div>
       </div>

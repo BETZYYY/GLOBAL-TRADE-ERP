@@ -33,7 +33,7 @@ function exposureScore(idrAmount) {
 async function calculate(req, res, next) {
   try {
     const { id_transaksi } = req.body;
-    if (!id_transaksi) return fail(res, 'id_transaksi wajib diisi.');
+    if (!id_transaksi) return fail(res, 'id_transaksi is required.');
 
     // Ambil data transaksi
     const [[trx]] = await pool.execute(
@@ -104,7 +104,7 @@ async function calculate(req, res, next) {
     };
 
     const rekomendasi = level_risiko === 'tinggi'
-      ? 'Wajib hedging. Eskalasi ke Finance Manager untuk persetujuan khusus.'
+      ? 'Hedging required. Escalate to Finance Manager for special approval.'
       : level_risiko === 'sedang'
       ? 'Disarankan hedging parsial. Monitor pergerakan kurs secara berkala.'
       : 'Risiko rendah. Tidak diperlukan tindakan khusus.';
@@ -126,7 +126,7 @@ async function calculate(req, res, next) {
     if (level_risiko === 'tinggi') {
       const id_peringatan  = crypto.randomUUID();
       const level_keparahan = skor_volatilitas >= 85 ? 'emergency' : 'critical';
-      const pesan_peringatan = `⚠️ Risiko TINGGI terdeteksi pada transaksi ${trx.nomor_referensi}. Skor: ${skor_volatilitas}/100. ${rekomendasi}`;
+      const pesan_peringatan = `⚠️ HIGH risk detected on transaction ${trx.nomor_referensi}. Score: ${skor_volatilitas}/100. ${rekomendasi}`;
 
       await pool.execute(
         `INSERT INTO tb_peringatan_risiko
@@ -177,7 +177,7 @@ async function calculate(req, res, next) {
       rekomendasi,
       breakdown: parameter_simulasi.scores,
       alert_dibuat: level_risiko === 'tinggi',
-    }, 'Analisis risiko berhasil dihitung.');
+    }, 'Risk analysis calculated successfully.');
   } catch (err) { next(err); }
 }
 

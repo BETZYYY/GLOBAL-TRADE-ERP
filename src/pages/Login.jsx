@@ -31,7 +31,7 @@ export default function Login() {
     setLocalError('');
 
     if (!form.email || !form.password) {
-      setLocalError('Email dan password wajib diisi.');
+      setLocalError('Email and password are required.');
       return;
     }
 

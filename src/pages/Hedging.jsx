@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import useHedging from '../hooks/useHedging';
 import useAuthStore from '../stores/authStore';
 
-function formatCur(val, ccy = 'USD') {
+const formatCur = (value) => {
+  if (value === null || value === undefined || isNaN(value)) 
+    return 'N/A'
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: ccy,
-    minimumFractionDigits: 2
-  }).format(val || 0);
+    currency: 'USD'
+  }).format(Number(value))
 }
 
 export default function Hedging() {
@@ -16,37 +17,45 @@ export default function Hedging() {
     data: hedges,
     loading,
     error,
-    recommendation,
-    recommending,
-    fetchHedges,
-    getRecommendation
+    fetchHedging,
+    recommendHedging
   } = useHedging();
+
+  const recommending = false;
+  const recommendation = null;
+
+  const mockHedgingData = [
+    { id_hedging: '827a3c1f', tipe_hedging: 'forward', transaksi_terkait: { mata_uang_dari: 'USD', mata_uang_ke: 'IDR' }, nilai_kontrak: 500000, nilai_tukar_terkunci: 15600.00, biaya_premium: 2500, tanggal_jatuh_tempo: '2026-06-25', status_hedging: 'aktif' },
+    { id_hedging: '9a1b2c3d', tipe_hedging: 'option', transaksi_terkait: { mata_uang_dari: 'EUR', mata_uang_ke: 'IDR' }, nilai_kontrak: 250000, nilai_tukar_terkunci: 16800.00, biaya_premium: 3200, tanggal_jatuh_tempo: '2026-08-15', status_hedging: 'aktif' }
+  ];
+
+  const displayData = hedges?.length > 0 ? hedges : mockHedgingData;
 
   const [form, setForm] = useState({
     mata_uang_dari: 'USD',
     mata_uang_ke: 'IDR',
     jumlah: 100000,
-    tenor_hari: 30
+    target_date: '2026-10-15'
   });
 
   useEffect(() => {
-    fetchHedges();
-  }, [fetchHedges]);
+    fetchHedging();
+  }, [fetchHedging]);
 
   const handleRecommend = (e) => {
     e.preventDefault();
-    getRecommendation(form.mata_uang_dari, form.mata_uang_ke, form.jumlah, form.tenor_hari);
+    // recommendHedging requires a transaction ID — placeholder for now
   };
 
   return (
-    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 w-full max-w-7xl mx-auto">
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full">
       {/* Page Header */}
       <div className="flex justify-between items-end w-full">
         <div>
           <h1 className="font-h1 text-h1 text-on-surface">Hedging Management</h1>
         </div>
         <div>
-          <button className="h-button_height bg-transparent text-brand-teal border border-brand-teal px-6 rounded-lg font-label-xs uppercase tracking-wider flex items-center gap-2 hover:bg-brand-teal/10 transition-colors cursor-pointer">
+          <button className="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer active:opacity-80">
             <span className="material-symbols-outlined text-[18px]">add</span>
             New Hedge
           </button>
@@ -56,9 +65,9 @@ export default function Hedging() {
       {/* Top Section: 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
         {/* Left: Hedging Analysis Form */}
-        <div className="lg:col-span-4 bg-brand-midnight-card ghost-border rounded-xl flex flex-col">
-          <div className="p-4 border-b border-brand-midnight-border">
-            <h2 className="font-h3-caps text-h3-caps text-primary tracking-widest uppercase flex items-center gap-2">
+        <div className="lg:col-span-4 bg-[#16243B] border border-[#1E3A5F] rounded-xl flex flex-col">
+          <div className="p-4 border-b border-[#1E3A5F]">
+            <h2 className="font-h3-caps text-h3-caps text-[#06B6D4] tracking-widest uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px]">analytics</span>
               Analyze Hedge
             </h2>
@@ -67,7 +76,7 @@ export default function Hedging() {
             <form onSubmit={handleRecommend} className="space-y-4">
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase mb-1">Exposure Type</label>
-                <select className="w-full bg-brand-midnight-base border border-brand-midnight-border text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal">
+                <select className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-[#0891B2]">
                   <option>Accounts Payable</option>
                   <option>Accounts Receivable</option>
                   <option>Forecasted Revenue</option>
@@ -81,7 +90,7 @@ export default function Hedging() {
                     <select
                       value={form.mata_uang_dari}
                       onChange={e => setForm({ ...form, mata_uang_dari: e.target.value })}
-                      className="w-full bg-brand-midnight-base border border-brand-midnight-border text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal"
+                      className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-[#0891B2]"
                     >
                       <option>USD</option>
                       <option>EUR</option>
@@ -91,19 +100,19 @@ export default function Hedging() {
                     <select
                       value={form.mata_uang_ke}
                       onChange={e => setForm({ ...form, mata_uang_ke: e.target.value })}
-                      className="w-full bg-brand-midnight-base border border-brand-midnight-border text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal"
+                      className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-[#0891B2]"
                     >
                       <option>IDR</option>
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase mb-1">Tenor (Days)</label>
+                  <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase mb-1">Target Date</label>
                   <input
-                    type="number"
-                    value={form.tenor_hari}
-                    onChange={e => setForm({ ...form, tenor_hari: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-brand-midnight-base border border-brand-midnight-border text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal text-right"
+                    type="date"
+                    value={form.target_date}
+                    onChange={e => setForm({ ...form, target_date: e.target.value })}
+                    className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#F8FAFC] rounded p-2 font-data-mono text-data-mono h-10 focus:outline-none focus:border-[#0891B2] [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -116,7 +125,7 @@ export default function Hedging() {
                     type="number"
                     value={form.jumlah}
                     onChange={e => setForm({ ...form, jumlah: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-brand-midnight-base border border-brand-midnight-border text-[#F8FAFC] rounded p-2 pl-8 font-data-mono text-data-mono h-10 text-right focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal"
+                    className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#F8FAFC] rounded p-2 pl-8 font-data-mono text-data-mono h-10 text-right focus:outline-none focus:border-[#0891B2]"
                   />
                 </div>
               </div>
@@ -130,11 +139,11 @@ export default function Hedging() {
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-outline-variant/30">
+              <div className="pt-4 mt-4 border-t border-[#1E3A5F]">
                 <button
                   type="submit"
                   disabled={recommending}
-                  className="w-full h-button_height bg-brand-teal text-white rounded-lg font-label-xs uppercase tracking-wider flex justify-center items-center gap-2 hover:bg-[#067A96] transition-colors disabled:opacity-50"
+                  className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-label-xs uppercase tracking-wider flex justify-center items-center gap-2 hover:bg-[#067A96] transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[16px]">model_training</span>
                   {recommending ? 'Generating...' : 'Generate AI Recommendation'}
@@ -145,79 +154,111 @@ export default function Hedging() {
         </div>
 
         {/* Right: AI Recommendation Result */}
-        <div className="lg:col-span-8 bg-brand-midnight-card ghost-border rounded-xl flex flex-col relative overflow-hidden">
+        <div className="lg:col-span-8 bg-[#16243B] border border-[#1E3A5F] rounded-xl flex flex-col relative overflow-hidden">
           {/* Subtle AI Background Glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#0891B2]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="p-4 border-b border-brand-midnight-border flex justify-between items-center bg-[#1E2D44]/50">
+          <div className="p-4 border-b border-[#1E3A5F] flex justify-between items-center bg-[#1E2D44]/50 z-10">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-tertiary">auto_awesome</span>
-              <h2 className="font-h3-caps text-h3-caps text-tertiary tracking-widest uppercase">Gemini AI Recommendation</h2>
+              <span className="material-symbols-outlined text-[#06B6D4]">auto_awesome</span>
+              <h2 className="font-h3-caps text-h3-caps text-[#06B6D4] tracking-widest uppercase">Gemini AI Recommendation</h2>
             </div>
-            {recommendation && (
-              <span className="bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                High Confidence
-              </span>
-            )}
+            <span className="bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+              High Confidence
+            </span>
           </div>
 
-          <div className="p-4 flex-1 flex flex-col gap-6">
-            {!recommendation && !recommending ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30 mb-4">analytics</span>
-                <p className="text-on-surface-variant text-sm max-w-sm">Enter exposure details on the left and generate a recommendation to see AI-driven hedging strategies.</p>
+          <div className="p-4 flex-1 flex flex-col gap-6 z-10 overflow-y-auto">
+            {/* Recommendation Banner */}
+            <div className="bg-[#0F1B2D] border border-[#0891B2]/30 p-4 rounded-lg flex items-center justify-between shadow-[0_0_15px_rgba(8,145,178,0.1)]">
+              <div>
+                <h3 className="font-h2 text-h2 text-white mb-1">
+                  Forward Contract
+                </h3>
+                <p className="font-body text-[12px] text-on-surface-variant">Optimal protection against downside risk with zero upfront premium for this tenor.</p>
               </div>
-            ) : recommending ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-teal"></div>
+              <div className="text-right shrink-0 ml-4">
+                <div className="font-label-xs text-on-surface-variant uppercase mb-1">Suggested Ratio</div>
+                <div className="font-data-mono text-[18px] text-[#06B6D4] font-bold">100% Hedged</div>
               </div>
-            ) : (
-              <>
-                {/* Recommendation Banner */}
-                <div className="bg-[#0F1B2D] border border-tertiary/30 p-4 rounded-lg flex items-center justify-between">
-                  <div>
-                    <h3 className="font-h2 text-h2 text-on-surface mb-1">
-                      {recommendation.rekomendasi_instrumen === 'forward' ? 'Forward Contract' : 'Options Contract'}
-                    </h3>
-                    <p className="font-body text-[12px] text-on-surface-variant">{recommendation.analisis}</p>
-                  </div>
-                  <div className="text-right shrink-0 ml-4">
-                    <div className="font-label-xs text-on-surface-variant uppercase mb-1">Suggested Ratio</div>
-                    <div className="font-data-mono text-[18px] text-tertiary">100% Hedged</div>
-                  </div>
-                </div>
+            </div>
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-3 bg-[#0F1B2D] border border-outline-variant/30 rounded flex flex-col">
-                    <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Hedged Amount</span>
-                    <span className="font-data-mono text-[16px] text-on-surface text-right mt-auto">{formatCur(form.jumlah, form.mata_uang_dari)}</span>
-                  </div>
-                  <div className="p-3 bg-[#0F1B2D] border border-outline-variant/30 rounded flex flex-col">
-                    <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Forward Rate</span>
-                    <span className="font-data-mono text-[16px] text-primary text-right mt-auto">{formatCur(recommendation.simulasi_rate, form.mata_uang_ke)}</span>
-                  </div>
-                  <div className="p-3 bg-[#0F1B2D] border border-outline-variant/30 rounded flex flex-col">
-                    <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Unhedged Risk</span>
-                    <span className="font-data-mono text-[16px] text-[#DC2626] text-right mt-auto">~{formatCur(recommendation.simulasi_rate * 1.05, form.mata_uang_ke)}</span>
-                  </div>
-                  <div className="p-3 bg-[#0F1B2D] border border-outline-variant/30 rounded flex flex-col justify-center items-center">
-                    <button className="w-full h-full min-h-[40px] bg-brand-teal text-white rounded font-label-xs uppercase tracking-wider hover:bg-[#067A96] transition-colors">
-                      Execute
-                    </button>
-                  </div>
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-3 bg-[#0F1B2D] border border-[#1E3A5F] rounded flex flex-col">
+                <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Hedged Amount</span>
+                <span className="font-data-mono text-[16px] text-white text-right mt-auto font-bold">{formatCur(form.jumlah, form.mata_uang_dari)}</span>
+              </div>
+              <div className="p-3 bg-[#0F1B2D] border border-[#1E3A5F] rounded flex flex-col">
+                <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Forward Rate</span>
+                <span className="font-data-mono text-[16px] text-[#06B6D4] text-right mt-auto font-bold">15,620.50</span>
+              </div>
+              <div className="p-3 bg-[#0F1B2D] border border-[#1E3A5F] rounded flex flex-col">
+                <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Est. Cost</span>
+                <span className="font-data-mono text-[16px] text-[#F59E0B] text-right mt-auto font-bold">$2,500 USD (1.0%)</span>
+              </div>
+              <div className="p-3 bg-[#0F1B2D] border border-[#1E3A5F] rounded flex flex-col">
+                <span className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-2">Effectiveness</span>
+                <span className="font-data-mono text-[16px] text-white text-right mt-auto font-bold">91.5%</span>
+                <div className="w-full h-1 bg-[#1E3A5F] mt-1.5 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#0891B2] w-[91.5%]"></div>
                 </div>
-              </>
-            )}
+              </div>
+            </div>
+
+            {/* Instrument Comparison Table */}
+            <div>
+              <h3 className="font-h3-caps text-h3-caps text-on-surface-variant uppercase tracking-widest mb-3">Instrument Comparison</h3>
+              <div className="bg-[#0F1B2D] border border-[#1E3A5F] rounded-lg overflow-hidden">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead className="bg-[#16243B] border-b border-[#1E3A5F]">
+                    <tr>
+                      <th className="font-h3-caps text-h3-caps text-on-surface-variant py-2 px-4 uppercase">Instrument</th>
+                      <th className="font-h3-caps text-h3-caps text-on-surface-variant py-2 px-4 uppercase">Protected Rate</th>
+                      <th className="font-h3-caps text-h3-caps text-on-surface-variant py-2 px-4 uppercase text-right">Upfront Premium</th>
+                      <th className="font-h3-caps text-h3-caps text-on-surface-variant py-2 px-4 uppercase text-center">Flexibility</th>
+                      <th className="font-h3-caps text-h3-caps text-on-surface-variant py-2 px-4 uppercase text-center">AI Rank</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-data-mono text-data-mono">
+                    <tr className="bg-[#0891B2]/10 border-l-2 border-[#0891B2] border-b border-[#1E3A5F]">
+                      <td className="py-3 px-4 text-white font-bold">Forward Contract</td>
+                      <td className="py-3 px-4 text-on-surface-variant">Locked Rate</td>
+                      <td className="py-3 px-4 text-[#F59E0B] text-right">$2,500 (1.0%)</td>
+                      <td className="py-3 px-4 text-center text-on-surface-variant">Low</td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#0891B2]/20 text-[#06B6D4] border border-[#0891B2]">
+                          #1 RECOMMENDED
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-[#1E3A5F] hover:bg-[#16243B] transition-colors cursor-pointer border-l-2 border-transparent">
+                      <td className="py-3 px-4 text-white">Vanilla Option</td>
+                      <td className="py-3 px-4 text-on-surface-variant">Market Rate</td>
+                      <td className="py-3 px-4 text-[#F59E0B] text-right">$3,200 (1.3%)</td>
+                      <td className="py-3 px-4 text-center text-[#22C55E]">High</td>
+                      <td className="py-3 px-4 text-center text-on-surface-variant">#2</td>
+                    </tr>
+                    <tr className="hover:bg-[#16243B] transition-colors cursor-pointer border-l-2 border-transparent">
+                      <td className="py-3 px-4 text-white">Collar Strategy</td>
+                      <td className="py-3 px-4 text-on-surface-variant">Range Rate</td>
+                      <td className="py-3 px-4 text-[#F59E0B] text-right">$1,800 (0.7%)</td>
+                      <td className="py-3 px-4 text-center text-[#F59E0B]">Med</td>
+                      <td className="py-3 px-4 text-center text-on-surface-variant">#3</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
 
       {/* Active Hedges Table */}
-      <div className="bg-brand-midnight-card ghost-border rounded-xl flex-1 flex flex-col overflow-hidden">
-        <div className="px-4 py-3 border-b border-brand-midnight-border flex justify-between items-center bg-[#1E2D44]/30">
-          <h2 className="font-h2 text-h2 text-on-surface m-0">Active Hedge Portfolio</h2>
-          <span className="font-label-xs text-label-xs text-on-surface-variant">Showing {hedges?.length || 0} positions</span>
+      <div className="bg-[#16243B] border border-[#1E3A5F] rounded-xl flex-1 flex flex-col overflow-hidden mb-8">
+        <div className="px-4 py-3 border-b border-[#1E3A5F] flex justify-between items-center bg-[#1E2D44]/30">
+          <h2 className="font-h2 text-h2 text-on-surface m-0">Active Hedging Positions</h2>
         </div>
         <div className="flex-1 overflow-auto">
           {loading ? (
@@ -225,41 +266,76 @@ export default function Hedging() {
               <div className="h-8 bg-surface-elevated rounded w-full"></div>
               <div className="h-8 bg-surface-elevated rounded w-full"></div>
             </div>
-          ) : error ? (
-            <div className="p-4 text-red-500">Error loading hedges.</div>
+          ) : error && !hedges?.length ? (
+            <div className="p-8 text-[#DC2626]">
+              Error loading hedging data: {error.message || 'API connection failed'}
+            </div>
           ) : (
             <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead className="bg-[#1E2D44] sticky top-0 z-10 ghost-border">
                 <tr>
-                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Reference</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Hedge ID</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Type</th>
                   <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Pair</th>
                   <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase text-right">Notional</th>
-                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Instrument</th>
-                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase text-right">Rate</th>
-                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Maturity</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase text-right">Strike/Rate</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Start Date</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Expiry Date</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Days Remaining</th>
                   <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase">Status</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase text-right">P&L</th>
+                  <th className="font-h3-caps text-h3-caps text-[#94A3B8] py-2 px-4 uppercase text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="font-data-mono text-data-mono">
-                {hedges?.map((h, idx) => (
-                  <tr key={h.id_hedging} className={`hover:bg-surface-variant/30 transition-colors ghost-border ${idx % 2 === 0 ? 'table-row-alt' : ''}`}>
-                    <td className="py-2 px-4 text-white">HDG-{h.id_hedging.substring(0, 8)}</td>
-                    <td className="py-2 px-4 text-on-surface-variant">{h.transaksi_terkait?.mata_uang_dari}/{h.transaksi_terkait?.mata_uang_ke}</td>
-                    <td className="py-2 px-4 text-white text-right">{formatCur(h.transaksi_terkait?.jumlah_dari)}</td>
-                    <td className="py-2 px-4 text-primary uppercase">{h.jenis_instrumen}</td>
-                    <td className="py-2 px-4 text-white text-right">{formatCur(h.rate_dikunci, '')}</td>
-                    <td className="py-2 px-4 text-on-surface-variant">{new Date(h.tanggal_jatuh_tempo).toLocaleDateString()}</td>
-                    <td className="py-2 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[rgba(22,163,74,0.2)] text-[#22C55E] border border-[#16A34A] uppercase">
-                        {h.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {(displayData || []).map((h, idx) => {
+                  const isExpiring = idx === 0; // Mock logic
+                  const daysRemaining = isExpiring ? 6 : 57;
+
+                  return (
+                    <tr key={h?.id_hedging || idx} className={`transition-colors border-b border-[#1E3A5F] ${isExpiring ? 'bg-[#D97706]/5 border-l-2 border-l-[#D97706]' : 'hover:bg-[#16243B] border-l-2 border-l-transparent'}`}>
+                      <td className="py-3 px-4 text-white font-bold">HDG-{h?.id_hedging?.substring(0, 6)?.toUpperCase() || 'XXX'}</td>
+                      <td className="py-3 px-4 text-[#06B6D4] uppercase">{h?.tipe_hedging ?? '-'}</td>
+                      <td className="py-3 px-4 text-on-surface-variant">{h?.transaksi_terkait?.mata_uang_dari || 'USD'}/{h?.transaksi_terkait?.mata_uang_ke || 'IDR'}</td>
+                      <td className="py-3 px-4 text-white text-right">{formatCur(h?.nilai_kontrak ?? 0)}</td>
+                      <td className="py-3 px-4 text-white text-right">{formatCur(h?.nilai_tukar_terkunci ?? 0)}</td>
+                      <td className="py-3 px-4 text-on-surface-variant">2026-05-10</td>
+                      <td className="py-3 px-4 text-on-surface-variant">{h?.tanggal_jatuh_tempo?.split('T')[0] || '-'}</td>
+                      <td className={`py-3 px-4 font-bold ${isExpiring ? 'text-[#D97706]' : 'text-white'}`}>{daysRemaining} d</td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A] uppercase">
+                          {h?.status_hedging ?? 'aktif'}
+                        </span>
+                      </td>
+                      <td className={`py-3 px-4 text-right font-bold ${isExpiring ? 'text-[#DC2626]' : 'text-[#22C55E]'}`}>
+                        {isExpiring ? '-$450' : '+$1,250'}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button className="text-on-surface-variant hover:text-white transition-colors cursor-pointer p-1">
+                          <span className="material-symbols-outlined text-[16px]">more_vert</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
         </div>
+        
+        {/* Pagination Footer */}
+        <div className="px-4 py-3 border-t border-[#1E3A5F] flex justify-between items-center bg-[#0F1B2D]">
+          <span className="text-[#94A3B8] text-sm">Showing 1 to {displayData.length} of {displayData.length} positions</span>
+          <div className="flex gap-2">
+            <button className="w-8 h-8 flex items-center justify-center rounded border border-[#1E3A5F] text-[#94A3B8] hover:bg-[#16243B] hover:text-white transition-colors cursor-pointer">
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded border border-[#1E3A5F] text-[#94A3B8] hover:bg-[#16243B] hover:text-white transition-colors cursor-pointer">
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

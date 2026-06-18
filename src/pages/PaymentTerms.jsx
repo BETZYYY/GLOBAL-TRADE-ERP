@@ -5,18 +5,11 @@ export default function PaymentTerms() {
   const [duration, setDuration] = useState('net60');
 
   return (
-    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col min-h-screen bg-brand-midnight-base">
+    <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full">
       
-      {/* Breadcrumb & Title */}
+      {/* Page Title */}
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end w-full max-w-[1600px] mx-auto">
-        <div>
-          <div className="flex items-center text-on-surface-variant font-body text-sm mb-1 space-x-2">
-            <span className="hover:text-white cursor-pointer transition-colors">Payment Terms</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-white">Optimizer</span>
-          </div>
-          <h1 className="font-h1 text-h1 text-white">Payment Term Optimizer</h1>
-        </div>
+        <h1 className="font-h1 text-h1 text-white">Payment Term Optimizer</h1>
       </div>
 
       {/* 2-Column Layout */}
@@ -34,7 +27,7 @@ export default function PaymentTerms() {
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Company Name</label>
                 <input 
-                  className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-body text-body outline-none focus:border-brand-teal" 
+                  className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white px-3 py-2 rounded-lg font-body text-body outline-none focus:border-[#0891B2]" 
                   readOnly 
                   type="text" 
                   value="Tanaka Trading Co., Ltd."
@@ -45,17 +38,17 @@ export default function PaymentTerms() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Partner Country</label>
-                  <div className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-body text-body flex items-center">
+                  <div className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white px-3 py-2 rounded-lg font-body text-body flex items-center">
                     <span className="mr-2 text-lg leading-none">🇯🇵</span> Japan
                   </div>
                 </div>
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Transaction Value</label>
                   <input 
-                    className="w-full bg-brand-midnight-base border border-brand-midnight-border text-white px-3 py-2 rounded-md font-data-mono text-data-mono text-right outline-none focus:border-brand-teal" 
-                    readOnly 
-                    type="text" 
-                    value="150,000 USD"
+                    className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white px-3 py-2 rounded-lg font-data-mono text-data-mono text-right outline-none focus:border-[#0891B2]" 
+                  readOnly 
+                  type="text" 
+                  value="150,000 USD"
                   />
                 </div>
               </div>
@@ -64,9 +57,9 @@ export default function PaymentTerms() {
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant mb-2">Current Payment Method</label>
                 <div className="space-y-2">
-                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'lc' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'lc' ? 'border-[#0891B2] bg-[#0891B2]/10' : 'border-transparent hover:bg-[#0F1B2D]'}`}>
                     <input 
-                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      className="custom-radio" 
                       name="pay_method" 
                       type="radio"
                       checked={payMethod === 'lc'}
@@ -74,9 +67,9 @@ export default function PaymentTerms() {
                     />
                     <span className="ml-3 font-body text-body text-white">Letter of Credit (LC)</span>
                   </label>
-                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'open' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'open' ? 'border-[#0891B2] bg-[#0891B2]/10' : 'border-transparent hover:bg-[#0F1B2D]'}`}>
                     <input 
-                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      className="custom-radio" 
                       name="pay_method" 
                       type="radio"
                       checked={payMethod === 'open'}
@@ -84,9 +77,9 @@ export default function PaymentTerms() {
                     />
                     <span className="ml-3 font-body text-body text-on-surface-variant">Open Account</span>
                   </label>
-                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'doc' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'doc' ? 'border-[#0891B2] bg-[#0891B2]/10' : 'border-transparent hover:bg-[#0F1B2D]'}`}>
                     <input 
-                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      className="custom-radio" 
                       name="pay_method" 
                       type="radio"
                       checked={payMethod === 'doc'}
@@ -94,9 +87,9 @@ export default function PaymentTerms() {
                     />
                     <span className="ml-3 font-body text-body text-on-surface-variant">Documentary Collection</span>
                   </label>
-                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'cash' ? 'border-brand-teal bg-brand-teal/10' : 'border-transparent hover:bg-brand-midnight-base'}`}>
+                  <label className={`flex items-center p-2.5 rounded-lg border cursor-pointer transition-colors ${payMethod === 'cash' ? 'border-[#0891B2] bg-[#0891B2]/10' : 'border-transparent hover:bg-[#0F1B2D]'}`}>
                     <input 
-                      className="custom-radio w-4 h-4 rounded-full border border-brand-midnight-border appearance-none checked:bg-brand-teal checked:border-brand-teal checked:after:content-[''] checked:after:block checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-white checked:after:rounded-full flex items-center justify-center outline-none" 
+                      className="custom-radio" 
                       name="pay_method" 
                       type="radio"
                       checked={payMethod === 'cash'}
@@ -135,12 +128,9 @@ export default function PaymentTerms() {
             </div>
 
             <div className="mt-8">
-              <button className="w-full h-button_height bg-brand-teal text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#067c9c] transition-colors focus-glow group relative overflow-hidden">
-                <span className="relative z-10 flex items-center">
-                  <span className="material-symbols-outlined mr-2 text-[18px]">model_training</span>
-                  Optimize Payment Term
-                </span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              <button className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer">
+                <span className="material-symbols-outlined mr-2 text-[18px]">model_training</span>
+                Optimize Payment Term
               </button>
             </div>
 
@@ -250,26 +240,26 @@ export default function PaymentTerms() {
           </div>
 
           {/* Mini Country Profile Footer */}
-          <div className="mt-auto pt-4 border-t border-brand-midnight-border">
+          <div className="mt-auto pt-4 border-t border-[#1E3A5F]">
             <h3 className="font-h3-caps text-h3-caps text-on-surface-variant mb-3 flex items-center">
               <span className="material-symbols-outlined text-[14px] mr-1.5">public</span>
-              JAPAN COUNTRY PROFILE
+              COUNTRY RISK PROFILE
             </h3>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
-                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Sovereign Rating</div>
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
+                <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Country Rating</div>
                 <div className="font-data-mono text-[15px] font-bold text-white flex items-center">
                   A+ <span className="ml-2 text-[10px] text-[#22C55E] flex items-center"><span className="material-symbols-outlined text-[12px]">trending_up</span></span>
                 </div>
               </div>
-              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
                 <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Payment History</div>
-                <div className="font-body text-sm font-medium text-white">Excellent</div>
+                <div className="font-body text-sm font-medium text-[#22C55E]">Excellent</div>
               </div>
-              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-brand-midnight-border">
+              <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
                 <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Currency Stability</div>
                 <div className="font-body text-sm font-medium text-white flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-brand-teal mr-2"></span> Low Volatility
+                  <span className="w-2 h-2 rounded-full bg-[#0891B2] mr-2"></span> Low Volatility
                 </div>
               </div>
             </div>

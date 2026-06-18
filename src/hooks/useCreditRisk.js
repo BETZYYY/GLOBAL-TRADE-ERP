@@ -10,7 +10,7 @@ export default function useCreditRisk() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/creditRisk/score', payload);
+      const res = await api.post('/credit-risk/score', payload);
       setData(res.data.data);
       return res.data.data;
     } catch (err) {

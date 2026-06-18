@@ -40,7 +40,7 @@ async function history(req, res, next) {
   try {
     const { pair, days = 30 } = req.query;
 
-    if (!pair) return fail(res, 'Query param "pair" wajib diisi, contoh: USD/IDR');
+    if (!pair) return fail(res, 'Query param "pair" is required, example: USD/IDR');
 
     const [dari, ke] = pair.split('/');
     if (!dari || !ke) return fail(res, 'Format pair salah. Gunakan format: USD/IDR');
@@ -120,7 +120,7 @@ async function fetchFromAPI(req, res, next) {
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return created(res, fetched, `${fetched.length} pasang kurs berhasil diperbarui.`);
+    return created(res, fetched, `${fetched.length} exchange rates updated successfully.`);
   } catch (err) {
     if (err.response?.status === 401) {
       return fail(res, 'API key OpenExchangeRates tidak valid.', 401);

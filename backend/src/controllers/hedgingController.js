@@ -41,7 +41,7 @@ async function list(req, res, next) {
       [...args, parseInt(limit, 10), (parseInt(page, 10) - 1) * parseInt(limit, 10)]
     );
 
-    return ok(res, rows, 'Berhasil', 200,
+    return ok(res, rows, 'Success', 200,
       { page: +page, limit: +limit, total, totalPages: Math.ceil(total / limit) }
     );
   } catch (err) { next(err); }
@@ -63,7 +63,7 @@ async function create(req, res, next) {
                       'mata_uang_lindung','nilai_tukar_terkunci',
                       'tanggal_mulai','tanggal_jatuh_tempo'];
     const missing  = required.filter(f => req.body[f] == null);
-    if (missing.length) return fail(res, `Field wajib: ${missing.join(', ')}`);
+    if (missing.length) return fail(res, `Required fields: ${missing.join(', ')}`);
 
     const [[trx]] = await pool.execute(
       'SELECT id_transaksi, nomor_referensi FROM tb_transaksi_pembayaran WHERE id_transaksi = ?',
@@ -96,7 +96,7 @@ async function create(req, res, next) {
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return created(res, hedging, `Posisi hedging ${tipe_hedging.toUpperCase()} berhasil dibuat.`);
+    return created(res, hedging, `Hedging position ${tipe_hedging.toUpperCase()} created successfully.`);
   } catch (err) { next(err); }
 }
 
@@ -107,7 +107,7 @@ async function create(req, res, next) {
 async function recommend(req, res, next) {
   try {
     const { id_transaksi } = req.query;
-    if (!id_transaksi) return fail(res, 'Query param id_transaksi wajib diisi.');
+    if (!id_transaksi) return fail(res, 'Query param id_transaksi is required.');
 
     const [[trx]] = await pool.execute(
       `SELECT t.*, k.nilai_kurs FROM tb_transaksi_pembayaran t

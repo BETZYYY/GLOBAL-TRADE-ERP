@@ -30,7 +30,7 @@ async function score(req, res, next) {
     } = req.body;
 
     if (!nama_perusahaan || !negara || histori_pembayaran == null) {
-      return fail(res, 'nama_perusahaan, negara, histori_pembayaran wajib diisi.');
+      return fail(res, 'company_name, country, payment_history are required.');
     }
 
     // ── 1. Payment history score (0–40 pts) ──────────────────────────────────
@@ -99,7 +99,7 @@ async function score(req, res, next) {
         volume:           Math.round(volScore       * 10) / 10,
         financial_ratios: Math.round(finScore       * 10) / 10,
       },
-    }, 'Credit score berhasil dihitung.');
+    }, 'Credit score calculated successfully.');
   } catch (err) { next(err); }
 }
 

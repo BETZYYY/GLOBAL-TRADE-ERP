@@ -79,7 +79,7 @@ app.use('/api/crypto',          cryptoRoutes);
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route tidak ditemukan: ${req.method} ${req.originalUrl}`,
+    message: `API endpoint not found: ${req.method} ${req.originalUrl}`,
   });
 });
 
@@ -89,21 +89,21 @@ app.use((err, _req, res, _next) => {
   console.error('[ERROR]', err);
 
   if (err.code === 'ER_DUP_ENTRY') {
-    return res.status(409).json({ success: false, message: 'Data duplikat terdeteksi.' });
+    return res.status(409).json({ success: false, message: 'Duplicate entry detected.' });
   }
 
   if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-    return res.status(400).json({ success: false, message: 'Referensi data tidak valid (foreign key).' });
+    return res.status(400).json({ success: false, message: 'Invalid data reference (foreign key constraint).' });
   }
 
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-    return res.status(401).json({ success: false, message: 'Token tidak valid atau sudah kadaluarsa.' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
   }
 
   const statusCode = err.statusCode || err.status || 500;
   const message    = process.env.NODE_ENV === 'production'
-    ? 'Terjadi kesalahan internal server.'
-    : (err.message || 'Terjadi kesalahan.');
+    ? 'Internal server error.'
+    : (err.message || 'An error occurred.');
 
   return res.status(statusCode).json({ success: false, message });
 });

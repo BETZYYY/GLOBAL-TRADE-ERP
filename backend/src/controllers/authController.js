@@ -61,7 +61,7 @@ async function login(req, res, next) {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email dan password wajib diisi.',
+        message: 'Email and password are required.',
       });
     }
 
@@ -120,7 +120,7 @@ async function login(req, res, next) {
 
       return res.status(423).json({
         success: false,
-        message: `Akun dikunci setelah ${MAX_FAILED_ATTEMPTS}x percobaan gagal. Hubungi administrator.`,
+        message: `Account locked after ${MAX_FAILED_ATTEMPTS} failed attempts. Contact administrator.`,
       });
     }
 
@@ -153,7 +153,7 @@ async function login(req, res, next) {
         success: false,
         message:
           newCount >= MAX_FAILED_ATTEMPTS
-            ? 'Akun telah dikunci karena terlalu banyak percobaan gagal.'
+            ? 'Account has been locked due to too many failed attempts.'
             : `Email atau password salah. Sisa percobaan: ${sisaPercobaan}x.`,
       });
     }
@@ -224,7 +224,7 @@ async function logout(req, res, next) {
 
     return res.json({
       success: true,
-      message: 'Logout berhasil.',
+      message: 'Logout successful.',
     });
   } catch (err) {
     next(err);
@@ -247,7 +247,7 @@ async function getMe(req, res, next) {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Pengguna tidak ditemukan.',
+        message: 'User not found.',
       });
     }
 

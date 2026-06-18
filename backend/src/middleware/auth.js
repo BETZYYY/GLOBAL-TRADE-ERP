@@ -15,7 +15,7 @@ function authenticate(req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       success: false,
-      message: 'Token tidak ditemukan. Silakan login terlebih dahulu.',
+      message: 'Token not found. Please log in first.',
     });
   }
 

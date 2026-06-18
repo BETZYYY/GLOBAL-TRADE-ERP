@@ -41,7 +41,7 @@ const useAuthStore = create(
           const data = await res.json();
 
           if (!res.ok) {
-            set({ isLoading: false, error: data.message || 'Login gagal.' });
+            set({ isLoading: false, error: data.message || 'Login failed.' });
             return { success: false, message: data.message };
           }
 

@@ -66,7 +66,7 @@ async function list(req, res, next) {
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return ok(res, rows, 'Berhasil', 200, paginate(page, limit, total));
+    return ok(res, rows, 'Success', 200, paginate(page, limit, total));
   } catch (err) { next(err); }
 }
 
@@ -113,7 +113,7 @@ async function create(req, res, next) {
     } = req.body;
 
     if (!id_kurs || !mata_uang_asal || !mata_uang_tujuan || !jumlah_asal || !nilai_tukar_pakai) {
-      return fail(res, 'Field wajib: id_kurs, mata_uang_asal, mata_uang_tujuan, jumlah_asal, nilai_tukar_pakai');
+      return fail(res, 'Required fields: id_kurs, mata_uang_asal, mata_uang_tujuan, jumlah_asal, nilai_tukar_pakai');
     }
 
     const nomor_referensi = await generateRef();
@@ -142,7 +142,7 @@ async function create(req, res, next) {
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return created(res, trx, `Transaksi ${nomor_referensi} berhasil dibuat.`);
+    return created(res, trx, `Transaction ${nomor_referensi} created successfully.`);
   } catch (err) { next(err); }
 }
 
@@ -173,7 +173,7 @@ async function approve(req, res, next) {
     });
 
     return ok(res, { id_transaksi: req.params.id, status_pembayaran: 'completed' },
-      `Transaksi ${trx.nomor_referensi} berhasil disetujui.`);
+      `Transaction ${trx.nomor_referensi} approved successfully.`);
   } catch (err) { next(err); }
 }
 
@@ -181,7 +181,7 @@ async function approve(req, res, next) {
 async function reject(req, res, next) {
   try {
     const { alasan } = req.body;
-    if (!alasan) return fail(res, 'Alasan penolakan wajib diisi.');
+    if (!alasan) return fail(res, 'Rejection reason is required.');
 
     const [[trx]] = await pool.execute(
       'SELECT * FROM tb_transaksi_pembayaran WHERE id_transaksi = ?', [req.params.id]
