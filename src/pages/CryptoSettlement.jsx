@@ -1,21 +1,73 @@
 import { useState, useEffect } from 'react';
 import useTransactions from '../hooks/useTransactions';
+import api from '../lib/api';
 
 export default function CryptoSettlement() {
   const { data: transactions, loading, fetchTransactions } = useTransactions();
-  const [network, setNetwork] = useState('erc20');
   const [showAlert, setShowAlert] = useState(true);
+  
+  const [formData, setFormData] = useState({
+    wallet_address: '',
+    amount: '',
+    network: 'ethereum',
+    reference: '',
+    purpose: ''
+  });
+  const [settlementStatus, setSettlementStatus] = useState(null);
 
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
+
+  useEffect(() => {
+    if (!settlementStatus?.id) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await api.get(`/crypto/status/${settlementStatus.id}`);
+        setSettlementStatus(res.data?.data);
+        if (res.data?.data?.confirmations >= 6) 
+          clearInterval(interval);
+      } catch (err) {
+        console.error(err);
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [settlementStatus?.id]);
+
+  const validateWallet = (address, network) => {
+    if (network === 'ethereum' || network === 'bsc') {
+      return /^0x[a-fA-F0-9]{40}$/.test(address);
+    }
+    if (network === 'solana') {
+      return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+    }
+    return address.length > 10;
+  };
+
+  const handleSettle = async () => {
+    if (!validateWallet(formData.wallet_address, formData.network)) {
+      alert('Invalid wallet address format');
+      return;
+    }
+    try {
+      const res = await api.post('/crypto/settle', {
+        wallet_address: formData.wallet_address,
+        jumlah: formData.amount,
+        network: formData.network,
+        nomor_referensi: formData.reference
+      });
+      setSettlementStatus(res.data?.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const pendingCrypto = (transactions || []).filter(t => t.tipe_transaksi === 'crypto' && t.status === 'pending');
 
   return (
     <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full">
       {/* Floating Alert */}
-      {showAlert && network === 'erc20' && (
+      {showAlert && formData.network === 'ethereum' && (
         <div className="fixed top-4 right-4 z-50 bg-[#1E2D44] border-l-4 border-[#D97706] border-y border-r border-y-[#1E3A5F] border-r-[#1E3A5F] rounded-xl p-4 w-80 shadow-lg">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -61,19 +113,19 @@ export default function CryptoSettlement() {
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">Select Network</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${network === 'erc20' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setNetwork('erc20')}>
+                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${formData.network === 'ethereum' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setFormData({...formData, network: 'ethereum'})}>
                     <span className="font-body text-[13px] font-medium">Ethereum</span>
                     <span className="font-label-xs text-label-xs text-on-surface-variant">ERC-20</span>
                   </label>
-                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${network === 'polygon' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setNetwork('polygon')}>
+                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${formData.network === 'polygon' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setFormData({...formData, network: 'polygon'})}>
                     <span className="font-body text-[13px] font-medium">Polygon</span>
                     <span className="font-label-xs text-label-xs text-on-surface-variant">MATIC</span>
                   </label>
-                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${network === 'bsc' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setNetwork('bsc')}>
+                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${formData.network === 'bsc' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setFormData({...formData, network: 'bsc'})}>
                     <span className="font-body text-[13px] font-medium">BSC</span>
                     <span className="font-label-xs text-label-xs text-on-surface-variant">BEP-20</span>
                   </label>
-                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${network === 'solana' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setNetwork('solana')}>
+                  <label className={`cursor-pointer border rounded-md p-2 flex flex-col items-center justify-center text-center transition-colors ${formData.network === 'solana' ? 'bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]' : 'bg-[#0F1B2D] border-[#1E3A5F] hover:border-[#1E3A5F] text-white'}`} onClick={() => setFormData({...formData, network: 'solana'})}>
                     <span className="font-body text-[13px] font-medium">Solana</span>
                     <span className="font-label-xs text-label-xs text-on-surface-variant">SPL</span>
                   </label>
@@ -85,14 +137,19 @@ export default function CryptoSettlement() {
                 <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">Destination Wallet Address</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">wallet</span>
-                  <input className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#d6e3ff] h-10 pl-10 pr-3 rounded-md font-data-mono text-data-mono focus:border-[#0891B2] focus:outline-none" type="text" placeholder="0x..." />
+                  <input value={formData.wallet_address} onChange={e => setFormData({...formData, wallet_address: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#d6e3ff] h-10 pl-10 pr-3 rounded-md font-data-mono text-data-mono focus:border-[#0891B2] focus:outline-none" type="text" placeholder="0x..." />
                 </div>
+                {formData.wallet_address && (
+                  <div className={`text-xs mt-1 font-medium flex items-center gap-1 ${validateWallet(formData.wallet_address, formData.network) ? 'text-green-500' : 'text-red-500'}`}>
+                    {validateWallet(formData.wallet_address, formData.network) ? '✅ Valid address' : '❌ Invalid format'}
+                  </div>
+                )}
               </div>
               
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-2">Amount</label>
                 <div className="relative">
-                  <input className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#d6e3ff] h-10 pl-3 pr-16 rounded-md font-data-mono text-data-mono text-right focus:border-[#0891B2] focus:outline-none" type="number" placeholder="0.00" />
+                  <input value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-[#d6e3ff] h-10 pl-3 pr-16 rounded-md font-data-mono text-data-mono text-right focus:border-[#0891B2] focus:outline-none" type="number" placeholder="0.00" />
                   <div className="absolute right-1 top-1 bottom-1 bg-[#1E2D44] px-3 flex items-center rounded text-on-surface font-label-xs text-label-xs border border-[#1E3A5F]">
                     USDC
                   </div>
@@ -112,7 +169,7 @@ export default function CryptoSettlement() {
 
               <div className="mt-auto pt-4 flex gap-3">
                 <button className="flex-1 h-button_height bg-transparent border border-[#0891B2] text-[#0891B2] rounded-lg font-label-xs uppercase tracking-wider hover:bg-[#0891B2]/10 transition-colors cursor-pointer">Cancel</button>
-                <button className="flex-1 h-button_height bg-[#0891B2] text-white rounded-lg font-label-xs uppercase tracking-wider hover:bg-[#067A96] transition-colors cursor-pointer">Initiate Settlement</button>
+                <button onClick={handleSettle} className="flex-1 h-button_height bg-[#0891B2] text-white rounded-lg font-label-xs uppercase tracking-wider hover:bg-[#067A96] transition-colors cursor-pointer">Initiate Settlement</button>
               </div>
             </div>
           </div>
@@ -141,8 +198,12 @@ export default function CryptoSettlement() {
                     <circle className="transition-all duration-1000 ease-in-out" cx="50" cy="50" fill="none" r="45" stroke="#0891B2" strokeDasharray="282.7" strokeDashoffset="93.3" strokeWidth="8"></circle>
                   </svg>
                   <div className="flex flex-col items-center text-center z-10">
-                    <span className="font-h1 text-h1 text-[#0891B2]">67%</span>
-                    <span className="font-label-xs text-label-xs text-on-surface-variant mt-1">4/6 Blocks</span>
+                    <span className="font-h1 text-h1 text-[#0891B2]">
+                      {settlementStatus ? Math.min(100, Math.floor((settlementStatus.confirmations / 6) * 100)) : 67}%
+                    </span>
+                    <span className="font-label-xs text-label-xs text-on-surface-variant mt-1">
+                      {settlementStatus ? Math.min(6, settlementStatus.confirmations) : 4}/6 Blocks
+                    </span>
                   </div>
                 </div>
                 <div className="mt-4 font-label-xs text-label-xs text-[#0891B2] animate-pulse">Awaiting final confirmations...</div>

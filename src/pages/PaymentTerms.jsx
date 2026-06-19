@@ -1,8 +1,34 @@
 import { useState } from 'react';
+import api from '../lib/api';
 
 export default function PaymentTerms() {
   const [payMethod, setPayMethod] = useState('lc');
   const [duration, setDuration] = useState('net60');
+  const [partnerCountry, setPartnerCountry] = useState('Japan');
+  const [transactionValue, setTransactionValue] = useState('150000');
+  const [results, setResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleOptimize = async () => {
+    if (!partnerCountry || !transactionValue) {
+      alert('Please fill Company Name and Transaction Value');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await api.post('/payment-terms/optimize', {
+        negara_mitra: partnerCountry,
+        nilai_transaksi: transactionValue,
+        metode_pembayaran: payMethod,
+        durasi_preferensi: duration
+      });
+      setResults(res.data?.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full">
@@ -39,16 +65,22 @@ export default function PaymentTerms() {
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Partner Country</label>
                   <div className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white px-3 py-2 rounded-lg font-body text-body flex items-center">
-                    <span className="mr-2 text-lg leading-none">🇯🇵</span> Japan
+                    <span className="mr-2 text-lg leading-none">🇯🇵</span> 
+                    <input 
+                      type="text" 
+                      className="bg-transparent border-none outline-none flex-1" 
+                      value={partnerCountry} 
+                      onChange={e => setPartnerCountry(e.target.value)} 
+                    />
                   </div>
                 </div>
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1.5">Transaction Value</label>
                   <input 
                     className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white px-3 py-2 rounded-lg font-data-mono text-data-mono text-right outline-none focus:border-[#0891B2]" 
-                  readOnly 
-                  type="text" 
-                  value="150,000 USD"
+                    type="number" 
+                    value={transactionValue}
+                    onChange={e => setTransactionValue(e.target.value)}
                   />
                 </div>
               </div>
@@ -128,9 +160,9 @@ export default function PaymentTerms() {
             </div>
 
             <div className="mt-8">
-              <button className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer">
+              <button disabled={isLoading} onClick={handleOptimize} className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer disabled:opacity-50">
                 <span className="material-symbols-outlined mr-2 text-[18px]">model_training</span>
-                Optimize Payment Term
+                {isLoading ? 'Optimizing...' : 'Optimize Payment Term'}
               </button>
             </div>
 
@@ -148,7 +180,9 @@ export default function PaymentTerms() {
           </div>
 
           {/* Card A: Recommended */}
-          <div className="bg-gradient-to-br from-[#16243B] to-[#0F1B2D] border border-brand-teal/40 rounded-xl p-5 relative overflow-hidden">
+          {!results ? (
+            <>
+              <div className="bg-gradient-to-br from-[#16243B] to-[#0F1B2D] border border-brand-teal/40 rounded-xl p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
             <div className="absolute top-0 right-0 bg-brand-teal text-[#0F1B2D] font-h3-caps text-[9px] px-3 py-1 rounded-bl-lg font-bold flex items-center shadow-[0_0_10px_rgba(8,145,178,0.3)]">
               <span className="material-symbols-outlined text-[12px] mr-1">verified</span> RECOMMENDED
@@ -264,9 +298,93 @@ export default function PaymentTerms() {
               </div>
             </div>
           </div>
+            </>
+          ) : (
+            <>
+              {/* Dynamic API Result Card - Recommended */}
+              {Array.isArray(results) ? results.map((r, i) => (
+                <div key={i} className={`rounded-xl p-5 relative overflow-hidden ${i === 0 ? 'bg-gradient-to-br from-[#16243B] to-[#0F1B2D] border border-brand-teal/40' : 'bg-brand-midnight-card ghost-border hover:border-outline-variant transition-colors'}`}>
+                  {i === 0 && (
+                    <>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                      <div className="absolute top-0 right-0 bg-brand-teal text-[#0F1B2D] font-h3-caps text-[9px] px-3 py-1 rounded-bl-lg font-bold flex items-center shadow-[0_0_10px_rgba(8,145,178,0.3)]">
+                        <span className="material-symbols-outlined text-[12px] mr-1">verified</span> RECOMMENDED
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between items-start mb-4 pr-24 relative z-10">
+                    <div>
+                      <div className="flex items-end gap-3 mb-1">
+                        <span className="font-data-mono text-xl font-bold text-white">{r.durasi || r.durasi_preferensi || 'N/A'}</span>
+                        <span className="text-on-surface-variant font-body">—</span>
+                        <span className="font-body font-medium text-white">{r.metode_pembayaran || r.payment_method || 'N/A'}</span>
+                      </div>
+                      {r.rekomendasi && <div className="text-xs text-on-surface-variant font-body mt-1">{r.rekomendasi}</div>}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase">Cash Flow Impact</div>
+                      <div className={`font-data-mono text-lg font-medium ${(r.dampak_cash_flow || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#F87171]'}`}>
+                        {(r.dampak_cash_flow || 0) >= 0 ? '+' : ''}{r.dampak_cash_flow ? `$${Math.abs(r.dampak_cash_flow).toLocaleString()}` : 'N/A'}
+                        {(r.dampak_cash_flow || 0) >= 0 && <span className="text-xs text-on-surface-variant font-body"> saved</span>}
+                      </div>
+                    </div>
+                  </div>
+                  {r.eksposur_risiko !== undefined && (
+                    <div className="w-1/3 relative z-10">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="font-label-xs text-label-xs text-on-surface-variant">Risk Exposure</span>
+                        <span className="font-data-mono text-[11px] text-brand-teal">{r.eksposur_risiko}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-[#0F1B2D] rounded-full overflow-hidden border border-brand-midnight-border">
+                        <div className="h-full bg-brand-teal rounded-full relative shadow-[0_0_8px_rgba(8,145,178,0.5)]" style={{ width: `${r.eksposur_risiko}%` }}></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )) : (
+                <div className="bg-[#16243B] rounded-xl border border-[#1E3A5F] p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="material-symbols-outlined text-[#0891B2]">task_alt</span>
+                    <h3 className="font-h3-caps text-h3-caps text-on-surface-variant">OPTIMIZATION RESULT</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {results.metode_rekomendasi && (
+                      <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
+                        <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Recommended Method</div>
+                        <div className="font-data-mono text-sm font-bold text-[#06B6D4]">{results.metode_rekomendasi}</div>
+                      </div>
+                    )}
+                    {results.durasi_optimal && (
+                      <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
+                        <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Optimal Duration</div>
+                        <div className="font-data-mono text-sm font-bold text-white">{results.durasi_optimal}</div>
+                      </div>
+                    )}
+                    {results.penghematan && (
+                      <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
+                        <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Estimated Savings</div>
+                        <div className="font-data-mono text-sm font-bold text-[#22C55E]">{results.penghematan}</div>
+                      </div>
+                    )}
+                    {results.skor_risiko !== undefined && (
+                      <div className="bg-[#0F1B2D] p-3 rounded-lg border border-[#1E3A5F]">
+                        <div className="font-label-xs text-label-xs text-on-surface-variant mb-1">Risk Score</div>
+                        <div className="font-data-mono text-sm font-bold text-[#F59E0B]">{results.skor_risiko}</div>
+                      </div>
+                    )}
+                  </div>
+                  {results.catatan && (
+                    <p className="mt-4 text-sm font-body text-on-surface-variant italic border-t border-[#1E3A5F] pt-3">{results.catatan}</p>
+                  )}
+                  {(!results.metode_rekomendasi && !results.durasi_optimal && !results.penghematan) && (
+                    <pre className="text-white font-data-mono text-xs overflow-auto mt-2">{JSON.stringify(results, null, 2)}</pre>
+                  )}
+                </div>
+              )}
+            </>
+          )}
 
         </div>
-
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import useAuthStore from '../stores/authStore';
 import useDashboard from '../hooks/useDashboard';
+import useRates from '../hooks/useRates';
 import useSocket from '../hooks/useSocket';
 
 function formatCur(val) {
@@ -43,16 +44,48 @@ const mockAlerts = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { data, loading, error, fetchSummary } = useDashboard();
+  const { history: rateHistory, fetchHistory } = useRates();
   const { socket } = useSocket();
 
   const [localAlerts, setLocalAlerts] = useState([]);
+  const [chartData, setChartData] = useState(mockChartData);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary]);
+    // Fetch history for the 4 main pairs to build chart data
+    Promise.all([
+      fetchHistory('USD/IDR', 30),
+      fetchHistory('EUR/IDR', 30),
+      fetchHistory('JPY/IDR', 30),
+      fetchHistory('GBP/IDR', 30),
+    ]).then(results => {
+      // combine results if successful
+      const validResults = results.filter(r => r && r.history && r.history.length > 0);
+      if (validResults.length > 0) {
+        // use the first valid result's dates as base
+        const baseHistory = validResults[0].history;
+        const combined = baseHistory.map((item, index) => {
+          const entry = { name: new Date(item.tanggal).toLocaleDateString('en-US', {month:'short', day:'numeric'}) };
+          validResults.forEach(r => {
+            const pairName = r.pair.split('/')[0];
+            // safely get matching index or use item
+            const match = r.history[index];
+            if (match) {
+              entry[pairName] = parseFloat(match.avg_rate) || 0;
+            }
+          });
+          return entry;
+        });
+        setChartData(combined);
+      }
+    }).catch(err => {
+      console.error('Failed to fetch chart data:', err);
+    });
+  }, [fetchSummary, fetchHistory]);
 
   useEffect(() => {
     if (data?.recent_alerts) {
@@ -102,10 +135,10 @@ export default function Dashboard() {
   }
 
   const { 
-    total_exposure = 4280000, 
-    hedging_coverage = 68, 
-    pending_approvals = 7, 
-    high_risk_transactions = 12 
+    total_exposure_usd = 4280000, 
+    hedging_coverage_pct = 68, 
+    pending_approvals_count = 7, 
+    high_risk_count = 12 
   } = data || {};
 
   return (
@@ -135,7 +168,7 @@ export default function Dashboard() {
             <span className="material-symbols-outlined text-[#0891B2]">trending_up</span>
           </div>
           <div className="mt-4">
-            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{formatCur(total_exposure)}</div>
+            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{formatCur(total_exposure_usd)}</div>
           </div>
         </div>
         
@@ -146,7 +179,7 @@ export default function Dashboard() {
             <span className="material-symbols-outlined text-[#DC2626]">warning</span>
           </div>
           <div className="mt-4">
-            <div className="font-h1 text-[28px] font-bold text-[#DC2626] tracking-tight">{high_risk_transactions}</div>
+            <div className="font-h1 text-[28px] font-bold text-[#DC2626] tracking-tight">{high_risk_count}</div>
           </div>
         </div>
 
@@ -157,11 +190,11 @@ export default function Dashboard() {
             <span className="material-symbols-outlined text-[#22C55E]">security</span>
           </div>
           <div className="mt-4 flex items-center justify-between">
-            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{Math.round(hedging_coverage || 0)}%</div>
+            <div className="font-h1 text-[28px] font-bold text-white tracking-tight">{Math.round(hedging_coverage_pct || 0)}%</div>
             <div className="relative w-12 h-12">
                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path className="text-[#1E3A5F]" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path className="text-[#0891B2]" strokeWidth="3" strokeDasharray={`${hedging_coverage}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path className="text-[#0891B2]" strokeWidth="3" strokeDasharray={`${hedging_coverage_pct}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                </svg>
             </div>
           </div>
@@ -174,7 +207,7 @@ export default function Dashboard() {
             <span className="material-symbols-outlined text-[#F59E0B]">schedule</span>
           </div>
           <div className="mt-4">
-            <div className="font-h1 text-[28px] font-bold text-[#F59E0B] tracking-tight">{pending_approvals}</div>
+            <div className="font-h1 text-[28px] font-bold text-[#F59E0B] tracking-tight">{pending_approvals_count}</div>
           </div>
         </div>
       </div>
@@ -191,7 +224,7 @@ export default function Dashboard() {
           </div>
           <div className="flex-1 w-full h-full min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" vertical={false} />
                 <XAxis dataKey="name" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `Rp ${value.toLocaleString()}`} width={80} />
@@ -238,7 +271,7 @@ export default function Dashboard() {
             </h2>
           </div>
           <div className="flex-1 overflow-auto p-4 space-y-3">
-            {mockAlerts.map(alert => {
+            {(localAlerts?.length > 0 ? localAlerts : mockAlerts).map(alert => {
               const severity = alert.tingkat_keparahan;
               const colors = severityColorMap[severity] || severityColorMap.WARNING;
               return (
@@ -250,7 +283,7 @@ export default function Dashboard() {
                       </span>
                       <span className="font-body text-body font-bold text-white text-sm">{alert.title}</span>
                     </div>
-                    <span className="text-[10px] text-on-surface-variant">{alert.time}</span>
+                    <span className="text-[10px] text-on-surface-variant">{alert.time || alert.timestamp_peringatan?.split('T')[0]}</span>
                   </div>
                   <p className="font-body text-body text-on-surface-variant text-sm mt-1">{alert.pesan_peringatan}</p>
                 </div>
@@ -303,7 +336,7 @@ export default function Dashboard() {
                   </td>
                   <td className="py-3 px-5 text-sm text-on-surface-variant">{row.status}</td>
                   <td className="py-3 px-5">
-                    <button className="text-[#0891B2] hover:text-white transition-colors cursor-pointer text-sm">Review</button>
+                    <button onClick={() => navigate(`/transactions/${row.ref}`)} className="text-[#0891B2] hover:text-white transition-colors cursor-pointer text-sm">Review</button>
                   </td>
                 </tr>
               ))}

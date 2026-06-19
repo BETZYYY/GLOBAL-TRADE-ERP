@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import useTransactions from '../hooks/useTransactions';
+import useRisk from '../hooks/useRisk';
 
 function fmt(n) {
   return new Intl.NumberFormat('en-US', { notation: 'standard', maximumFractionDigits: 2 }).format(n);
@@ -10,14 +11,50 @@ function fmt(n) {
 export default function Transactions() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { data: transactions, loading, fetchTransactions, approveTransaction } = useTransactions();
+  const { data: transactions, loading, fetchTransactions, createTransaction } = useTransactions();
+  const { calculateRisk } = useRisk();
+  
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [riskFilter, setRiskFilter] = useState('');
+  const [currencyFilter, setCurrencyFilter] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('SWIFT');
 
+  const [formData, setFormData] = useState({
+    mata_uang_asal: 'USD',
+    mata_uang_tujuan: 'IDR',
+    jumlah_asal: '',
+    tanggal_transaksi: new Date().toISOString().split('T')[0],
+    tanggal_penyelesaian: '',
+    rekanan_negara: 'United States',
+    catatan: ''
+  });
+
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    fetchTransactions({ 
+      status: statusFilter, 
+      risk_level: riskFilter, 
+      mata_uang_asal: currencyFilter 
+    });
+  }, [fetchTransactions, statusFilter, riskFilter, currencyFilter]);
+
+  const handleSubmit = async () => {
+    if (!formData.mata_uang_asal || !formData.jumlah_asal) {
+      alert('Please fill all required fields');
+      return;
+    }
+    try {
+      const newTx = await createTransaction({ ...formData, metode_pembayaran: paymentMethod });
+      if (newTx && newTx.id_transaksi) {
+        await calculateRisk(newTx.id_transaksi);
+      }
+      setIsDrawerOpen(false);
+      fetchTransactions({ status: statusFilter, risk_level: riskFilter, mata_uang_asal: currencyFilter });
+    } catch (err) {
+      console.error('Failed to create transaction:', err);
+    }
+  };
 
   const filtered = (transactions || []).filter(t =>
     t.nomor_referensi.toLowerCase().includes(search.toLowerCase()) || 
@@ -61,10 +98,10 @@ export default function Transactions() {
           <div className="w-32">
             <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Status</label>
             <div className="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
-              <select className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
-                <option>All Status</option>
-                <option>Pending</option>
-                <option>Settled</option>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="settled">Settled</option>
               </select>
               <span className="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
             </div>
@@ -72,10 +109,10 @@ export default function Transactions() {
           <div className="w-32">
             <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Risk Level</label>
             <div className="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
-              <select className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
-                <option>All Risk</option>
-                <option>High</option>
-                <option>Low</option>
+              <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+                <option value="">All Risk</option>
+                <option value="tinggi">High</option>
+                <option value="rendah">Low</option>
               </select>
               <span className="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
             </div>
@@ -83,10 +120,10 @@ export default function Transactions() {
           <div className="w-32">
             <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1 uppercase tracking-wider">Currency</label>
             <div className="relative teal-focus ghost-border rounded bg-brand-midnight-base h-8 flex items-center px-2 cursor-pointer">
-              <select className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
-                <option>All Pairs</option>
-                <option>USD/IDR</option>
-                <option>EUR/IDR</option>
+              <select value={currencyFilter} onChange={(e) => setCurrencyFilter(e.target.value)} className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
+                <option value="">All Pairs</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
               </select>
               <span className="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
             </div>
@@ -98,7 +135,7 @@ export default function Transactions() {
               <input className="bg-transparent border-none outline-none text-white font-data-mono text-data-mono w-full p-0 h-full focus:ring-0" type="text" defaultValue="Oct 1 - Oct 31"/>
             </div>
           </div>
-          <button className="h-8 px-3 rounded ghost-border text-on-surface-variant hover:text-white hover:bg-surface-variant/50 transition-colors font-label-xs text-label-xs flex items-center cursor-pointer">
+          <button onClick={() => { setStatusFilter(''); setRiskFilter(''); setCurrencyFilter(''); setSearch(''); }} className="h-8 px-3 rounded ghost-border text-on-surface-variant hover:text-white hover:bg-surface-variant/50 transition-colors font-label-xs text-label-xs flex items-center cursor-pointer">
               Clear
           </button>
         </div>
@@ -218,16 +255,17 @@ export default function Transactions() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">From Currency</label>
-                  <select className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
-                    <option>USD - US Dollar</option>
-                    <option>EUR - Euro</option>
+                  <select value={formData.mata_uang_asal} onChange={e => setFormData({...formData, mata_uang_asal: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
                   </select>
                 </div>
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">To Currency</label>
-                  <select className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
-                    <option>IDR - Indonesian Rupiah</option>
-                    <option>JPY - Japanese Yen</option>
+                  <select value={formData.mata_uang_tujuan} onChange={e => setFormData({...formData, mata_uang_tujuan: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
+                    <option value="IDR">IDR - Indonesian Rupiah</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
                   </select>
                 </div>
               </div>
@@ -235,28 +273,28 @@ export default function Transactions() {
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Transaction Amount</label>
                 <div className="flex items-center bg-[#0F1B2D] border border-[#1E3A5F] rounded overflow-hidden focus-within:border-[#0891B2]">
-                  <input type="number" placeholder="0.00" className="flex-1 bg-transparent border-none text-white p-2 text-sm outline-none" />
-                  <span className="px-3 text-on-surface-variant text-sm font-bold border-l border-[#1E3A5F]">USD</span>
+                  <input type="number" value={formData.jumlah_asal} onChange={e => setFormData({...formData, jumlah_asal: e.target.value})} placeholder="0.00" className="flex-1 bg-transparent border-none text-white p-2 text-sm outline-none" />
+                  <span className="px-3 text-on-surface-variant text-sm font-bold border-l border-[#1E3A5F]">{formData.mata_uang_asal}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Transaction Date</label>
-                  <input type="date" className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
+                  <input type="date" value={formData.tanggal_transaksi} onChange={e => setFormData({...formData, tanggal_transaksi: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
                 </div>
                 <div>
                   <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Settlement Date</label>
-                  <input type="date" className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
+                  <input type="date" value={formData.tanggal_penyelesaian} onChange={e => setFormData({...formData, tanggal_penyelesaian: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
                 </div>
               </div>
 
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Partner Country</label>
-                <select className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
-                  <option>United States</option>
-                  <option>Singapore</option>
-                  <option>China</option>
+                <select value={formData.rekanan_negara} onChange={e => setFormData({...formData, rekanan_negara: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
+                  <option value="United States">United States</option>
+                  <option value="Singapore">Singapore</option>
+                  <option value="China">China</option>
                 </select>
               </div>
 
@@ -281,7 +319,7 @@ export default function Transactions() {
 
               <div>
                 <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Notes (Optional)</label>
-                <textarea rows="3" className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none resize-none" placeholder="Add any references or additional info..."></textarea>
+                <textarea value={formData.catatan} onChange={e => setFormData({...formData, catatan: e.target.value})} rows="3" className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none resize-none" placeholder="Add any references or additional info..."></textarea>
               </div>
 
               {/* Exposure Preview Card */}
@@ -310,7 +348,7 @@ export default function Transactions() {
 
             {/* Footer */}
             <div className="bg-[#0A1628] border-t border-[#1E3A5F] p-4 shrink-0 flex flex-col gap-3">
-              <button className="w-full h-10 bg-[#0891B2] text-white font-bold rounded flex items-center justify-center hover:bg-[#067A96] transition-colors cursor-pointer">
+              <button onClick={handleSubmit} className="w-full h-10 bg-[#0891B2] text-white font-bold rounded flex items-center justify-center hover:bg-[#067A96] transition-colors cursor-pointer">
                 Submit Transaction
               </button>
               <button 

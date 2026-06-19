@@ -1,8 +1,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import useAuthStore from '../../stores/authStore';
 
 export default function Header() {
   const location = useLocation();
+  const { user } = useAuthStore();
   const path = location.pathname;
   let breadcrumb = 'Dashboard';
   
@@ -28,6 +30,16 @@ export default function Header() {
         <button className="text-on-surface-variant hover:text-[#0891B2] transition-colors cursor-pointer active:opacity-80 p-2 rounded-full hover:bg-[#0F1B2D]">
           <span className="material-symbols-outlined" data-icon="notifications">notifications</span>
         </button>
+        <div className="flex items-center gap-3 ml-4">
+          {/* Role Badge */}
+          <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[#0891B2]/20 text-[#06B6D4] border border-[#0891B2]/30 uppercase tracking-wider">
+            {user?.peran?.replace('_', ' ') || 'User'}
+          </span>
+          {/* Avatar */}
+          <div className="w-8 h-8 rounded-full bg-[#0891B2]/30 flex items-center justify-center text-sm font-bold text-white">
+            {user?.nama_lengkap?.charAt(0) || 'U'}
+          </div>
+        </div>
       </div>
     </header>
   );

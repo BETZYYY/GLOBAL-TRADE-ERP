@@ -1,4 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { PieChart, Pie, Cell } from 'recharts';
+
+const ALLOCATIONS = {
+  USD: 45, EUR: 25, JPY: 20, GBP: 10,
+  CAD: 8, AUD: 7, CNY: 6, CHF: 4
+};
+
+const COLORS = ['#0891B2','#06B6D4','#D97706','#475569',
+                '#16A34A','#7C3AED','#DC2626','#0E7490'];
 
 export default function CurrencyBasket() {
   const [selectedCurrencies, setSelectedCurrencies] = useState({
@@ -29,6 +38,30 @@ export default function CurrencyBasket() {
 
   const selectedCount = Object.values(selectedCurrencies).filter(Boolean).length;
 
+  const selectedAllocations = useMemo(() => {
+    const selected = currencies.filter(c => selectedCurrencies[c.code]);
+    if (selected.length === 0) return [];
+    const total = selected.reduce((sum, c) => 
+      sum + (ALLOCATIONS[c.code] || 5), 0);
+    let cumulative = 0;
+    return selected.map(c => {
+      const pct = (ALLOCATIONS[c.code] || 5) / total * 100;
+      const start = cumulative;
+      cumulative += pct;
+      return { ...c, pct: Math.round(pct), start };
+    });
+  }, [selectedCurrencies, currencies]);
+
+  const portfolioVolatility = useMemo(() => {
+    if (selectedCount <= 1) return 4.82;
+    return Math.max(0.5, (4.82 / selectedCount * 0.8)).toFixed(2);
+  }, [selectedCount]);
+
+  const correlationRisk = useMemo(() => {
+    if (selectedCount <= 1) return 1.0;
+    return Math.max(0.1, (1.0 - selectedCount * 0.12)).toFixed(2);
+  }, [selectedCount]);
+
   return (
     <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 max-w-full bg-[#0F1B2D] min-h-screen">
       {/* Page Title */}
@@ -40,12 +73,12 @@ export default function CurrencyBasket() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-[#16243B] border border-[#1E3A5F] rounded-xl p-5 flex flex-col gap-2">
           <span className="font-h3-caps text-h3-caps text-on-surface-variant uppercase tracking-widest">Portfolio Volatility</span>
-          <span className="font-data-mono text-[20px] font-bold text-white">2.14%</span>
+          <span className="font-data-mono text-[20px] font-bold text-white">{portfolioVolatility}%</span>
           <span className="font-body text-sm text-[#22C55E]">-56% vs single-currency</span>
         </div>
         <div className="bg-[#16243B] border border-[#1E3A5F] rounded-xl p-5 flex flex-col gap-2">
           <span className="font-h3-caps text-h3-caps text-on-surface-variant uppercase tracking-widest">Correlation Risk</span>
-          <span className="font-data-mono text-[20px] font-bold text-white">0.43</span>
+          <span className="font-data-mono text-[20px] font-bold text-white">{correlationRisk}</span>
           <span className="font-body text-sm text-[#0D9488]">Moderate — Good diversification</span>
         </div>
       </div>
@@ -127,15 +160,21 @@ export default function CurrencyBasket() {
             </div>
             <div className="flex-1 flex items-center gap-12 px-4">
               {/* Donut Chart Area */}
-              <div className="relative w-48 h-48 shrink-0">
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#1E3A5F" strokeWidth="15"></circle>
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#0891B2" strokeDasharray="113.1 251.2" strokeDashoffset="0" strokeWidth="15"></circle>
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#06b6d4" strokeDasharray="62.8 251.2" strokeDashoffset="-113.1" strokeWidth="15"></circle>
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#d97706" strokeDasharray="50.2 251.2" strokeDashoffset="-175.9" strokeWidth="15"></circle>
-                  <circle cx="50" cy="50" fill="none" r="40" stroke="#64748b" strokeDasharray="25.1 251.2" strokeDashoffset="-226.1" strokeWidth="15"></circle>
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="relative w-48 h-48 shrink-0 flex items-center justify-center">
+                <PieChart width={200} height={200}>
+                  <Pie 
+                    data={selectedAllocations} 
+                    dataKey="pct" 
+                    innerRadius={60} 
+                    outerRadius={90}
+                    stroke="none"
+                  >
+                    {selectedAllocations.map((_, i) => 
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    )}
+                  </Pie>
+                </PieChart>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="font-data-mono text-data-mono text-white text-xl">{selectedCount}</span>
                   <span className="font-label-xs text-label-xs text-on-surface-variant uppercase">Assets</span>
                 </div>
@@ -143,19 +182,14 @@ export default function CurrencyBasket() {
 
               {/* Legend */}
               <div className="flex-1 space-y-3">
-                {[
-                  { code: 'USD', pct: '45%', val: 'Rp 30.3B', color: '#0891B2' },
-                  { code: 'EUR', pct: '25%', val: 'Rp 16.8B', color: '#06b6d4' },
-                  { code: 'JPY', pct: '20%', val: 'Rp 13.5B', color: '#d97706' },
-                  { code: 'GBP', pct: '10%', val: 'Rp 6.7B', color: '#64748b' },
-                ].map(item => (
+                {selectedAllocations.map(item => (
                   <div key={item.code} className="flex items-center justify-between p-2 rounded hover:bg-[#0F1B2D] transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ background: item.color }}></div>
                       <span className="font-data-mono text-data-mono font-bold text-white">{item.code}</span>
-                      <span className="font-body text-body text-on-surface-variant min-w-[40px]">{item.pct}</span>
+                      <span className="font-body text-body text-on-surface-variant min-w-[40px]">{item.pct}%</span>
                     </div>
-                    <span className="font-data-mono text-data-mono text-on-surface-variant">{item.val}</span>
+                    <span className="font-data-mono text-data-mono text-on-surface-variant">Rp {((item.pct / 100) * 67.3).toFixed(1)}B</span>
                   </div>
                 ))}
               </div>

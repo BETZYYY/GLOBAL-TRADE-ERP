@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import api from '../lib/api';
 import useRisk from '../hooks/useRisk';
 import useTransactions from '../hooks/useTransactions';
 
@@ -8,10 +9,15 @@ export default function RiskDetail() {
   const { data: riskData, loading: riskLoading, getRiskByTransaction } = useRisk();
   const { data: transactions, fetchTransactions } = useTransactions();
 
+  const [activityLog, setActivityLog] = useState(null);
+
   useEffect(() => {
     fetchTransactions();
     if (id) {
       getRiskByTransaction(id);
+      api.get(`/alerts?entity_id=${id}`)
+        .then(res => setActivityLog(res.data?.data || []))
+        .catch(() => setActivityLog(null));
     }
   }, [id, fetchTransactions, getRiskByTransaction]);
 
@@ -31,7 +37,7 @@ export default function RiskDetail() {
   const isHigh = riskLevel === 'tinggi';
   const isMed = riskLevel === 'menengah';
 
-  const activities = [
+  const mockActivityLog = [
     { type: 'critical', actor: 'Risk Engine', role: 'System', time: '10:42 AM', desc: 'Volatility threshold exceeded (3.42%)' },
     { type: 'warning', actor: 'A. Kusuma', role: 'Risk Analyst', time: '10:30 AM', desc: 'Flagged transaction for manual review' },
     { type: 'info', actor: 'B. Wijaya', role: 'Treasury Officer', time: '09:41 AM', desc: 'Submitted FX request USD/IDR' },
@@ -39,6 +45,70 @@ export default function RiskDetail() {
     { type: 'info', actor: 'Liquidity Pool', role: 'System', time: '09:40 AM', desc: 'Reserved IDR equivalent' },
     { type: 'info', actor: 'B. Wijaya', role: 'Treasury Officer', time: '09:35 AM', desc: 'Drafted transaction' }
   ];
+
+  const activities = (activityLog && activityLog.length > 0) ? activityLog.map(entry => {
+    const isCritical = entry.tingkat_keparahan === 'darurat' || entry.tingkat_keparahan === 'kritis' || entry.pesan_peringatan?.toLowerCase().includes('critical');
+    const isWarning = entry.tingkat_keparahan === 'peringatan' || entry.pesan_peringatan?.toLowerCase().includes('warning');
+    return {
+      type: isCritical ? 'critical' : isWarning ? 'warning' : 'info',
+      actor: entry.nama_pengguna || entry.jenis_aksi || 'System',
+      role: 'System',
+      time: (entry.timestamp_aksi || entry.timestamp_peringatan) ? new Date(entry.timestamp_aksi || entry.timestamp_peringatan).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '',
+      desc: entry.pesan_peringatan || entry.jenis_aksi || entry.desc
+    };
+  }) : mockActivityLog;
+
+  const handleForwardContract = async () => {
+    try {
+      await api.post('/hedging', {
+        id_transaksi: id,
+        tipe_hedging: 'forward',
+        nilai_kontrak: tx?.jumlah_asal,
+        mata_uang_lindung: tx?.mata_uang_asal,
+        tanggal_mulai: new Date().toISOString().split('T')[0],
+        tanggal_jatuh_tempo: tx?.tanggal_transaksi?.split('T')[0]
+      });
+      alert('Forward Contract applied successfully');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleOptionContract = async () => {
+    try {
+      await api.post('/hedging', {
+        id_transaksi: id,
+        tipe_hedging: 'option',
+        nilai_kontrak: tx?.jumlah_asal,
+        mata_uang_lindung: tx?.mata_uang_asal,
+        tanggal_mulai: new Date().toISOString().split('T')[0],
+        tanggal_jatuh_tempo: tx?.tanggal_transaksi?.split('T')[0]
+      });
+      alert('Option Contract applied successfully');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleApprove = async () => {
+    try {
+      await api.patch(`/transactions/${id}/approve`);
+      fetchTransactions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReject = async () => {
+    const reason = prompt('Rejection reason:');
+    if (!reason) return;
+    try {
+      await api.patch(`/transactions/${id}/reject`, { reason });
+      fetchTransactions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="pt-20 px-gutter pb-8 flex flex-col gap-6 w-full max-w-7xl mx-auto">
@@ -143,8 +213,16 @@ export default function RiskDetail() {
               </div>
             </div>
             
-            <div className="text-center mt-4">
-              <span className="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Current Status: Pending Risk Review</span>
+            <div className="text-center mt-4 flex flex-col gap-2">
+              <span className="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Current Status: {tx?.status_transaksi || 'Pending Risk Review'}</span>
+              <div className="flex gap-2 justify-center mt-2">
+                <button onClick={handleApprove} className="px-4 py-1.5 bg-[#16A34A]/20 text-[#22C55E] border border-[#16A34A] rounded text-[11px] font-bold uppercase tracking-wider hover:bg-[#16A34A]/30 transition-colors">
+                  Approve
+                </button>
+                <button onClick={handleReject} className="px-4 py-1.5 bg-[#DC2626]/20 text-[#EF4444] border border-[#DC2626] rounded text-[11px] font-bold uppercase tracking-wider hover:bg-[#DC2626]/30 transition-colors">
+                  Reject
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -222,11 +300,11 @@ export default function RiskDetail() {
             {/* Mitigation Options */}
             <div className="w-full flex flex-col gap-3 z-10 relative">
               <h3 className="font-label-xs text-label-xs text-on-surface-variant uppercase border-b border-[#1E3A5F] pb-1 mb-2">Recommended Mitigations</h3>
-              <button className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[#06b6d4] transition-colors">
+              <button onClick={handleForwardContract} className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[#06b6d4] transition-colors cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">security</span>
                 Apply Forward Contract
               </button>
-              <button className="w-full h-button_height bg-transparent border border-[#0891B2] text-[#0891B2] rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[#0891B2]/10 transition-colors">
+              <button onClick={handleOptionContract} className="w-full h-button_height bg-transparent border border-[#0891B2] text-[#0891B2] rounded-lg font-body text-body font-medium flex items-center justify-center gap-2 hover:bg-[#0891B2]/10 transition-colors cursor-pointer">
                 <span className="material-symbols-outlined text-[18px]">show_chart</span>
                 Buy Currency Option
               </button>

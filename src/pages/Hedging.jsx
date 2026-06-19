@@ -18,11 +18,23 @@ export default function Hedging() {
     loading,
     error,
     fetchHedging,
-    recommendHedging
+    recommendHedging,
+    executeHedging
   } = useHedging();
 
-  const recommending = false;
-  const recommendation = null;
+  const [isLoading, setIsLoading] = useState(false);
+  const [recommendation, setRecommendation] = useState(null);
+  const [showNewHedge, setShowNewHedge] = useState(false);
+  const [hedgeFormData, setHedgeFormData] = useState({
+    id_transaksi: '',
+    tipe_hedging: 'forward',
+    nilai_kontrak: '',
+    mata_uang: 'USD',
+    tanggal_mulai: '',
+    tanggal_jatuh_tempo: '',
+    biaya_premium: '',
+    institusi_keuangan: ''
+  });
 
   const mockHedgingData = [
     { id_hedging: '827a3c1f', tipe_hedging: 'forward', transaksi_terkait: { mata_uang_dari: 'USD', mata_uang_ke: 'IDR' }, nilai_kontrak: 500000, nilai_tukar_terkunci: 15600.00, biaya_premium: 2500, tanggal_jatuh_tempo: '2026-06-25', status_hedging: 'aktif' },
@@ -42,9 +54,37 @@ export default function Hedging() {
     fetchHedging();
   }, [fetchHedging]);
 
-  const handleRecommend = (e) => {
+  const handleRecommend = async (e) => {
     e.preventDefault();
-    // recommendHedging requires a transaction ID — placeholder for now
+    if (!form.mata_uang_dari || !form.jumlah) {
+      alert('Please fill Currency Pair and Exposure Amount');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const result = await recommendHedging({
+        currency_pair: `${form.mata_uang_dari}/${form.mata_uang_ke}`,
+        exposure_amount: form.jumlah,
+        target_date: form.target_date,
+        risk_tolerance: form.risk_tolerance || 20
+      });
+      setRecommendation(result);
+    } catch (err) {
+      console.error('Recommendation failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNewHedgeSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await executeHedging(hedgeFormData);
+      setShowNewHedge(false);
+      fetchHedging();
+    } catch (err) {
+      console.error('Failed to create hedge:', err);
+    }
   };
 
   return (
@@ -55,7 +95,7 @@ export default function Hedging() {
           <h1 className="font-h1 text-h1 text-on-surface">Hedging Management</h1>
         </div>
         <div>
-          <button className="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer active:opacity-80">
+          <button onClick={() => setShowNewHedge(true)} className="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer active:opacity-80">
             <span className="material-symbols-outlined text-[18px]">add</span>
             New Hedge
           </button>
@@ -141,12 +181,13 @@ export default function Hedging() {
 
               <div className="pt-4 mt-4 border-t border-[#1E3A5F]">
                 <button
-                  type="submit"
-                  disabled={recommending}
+                  type="button"
+                  onClick={handleRecommend}
+                  disabled={isLoading}
                   className="w-full h-button_height bg-[#0891B2] text-white rounded-lg font-label-xs uppercase tracking-wider flex justify-center items-center gap-2 hover:bg-[#067A96] transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[16px]">model_training</span>
-                  {recommending ? 'Generating...' : 'Generate AI Recommendation'}
+                  {isLoading ? 'Analyzing...' : 'Generate AI Recommendation'}
                 </button>
               </div>
             </form>
@@ -337,6 +378,87 @@ export default function Hedging() {
         </div>
 
       </div>
+
+      {showNewHedge && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-40" 
+            onClick={() => setShowNewHedge(false)}
+          ></div>
+          <div className="fixed right-0 top-0 h-full w-[480px] bg-[#16243B] border-l border-[#1E3A5F] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="h-14 border-b border-[#1E3A5F] px-6 flex items-center justify-between shrink-0">
+              <h2 className="font-h2 text-h2 text-white m-0">New Hedge</h2>
+              <button 
+                onClick={() => setShowNewHedge(false)}
+                className="text-on-surface-variant hover:text-white cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Form Scrollable Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Transaction Ref ID</label>
+                <input type="text" value={hedgeFormData.id_transaksi} onChange={e => setHedgeFormData({...hedgeFormData, id_transaksi: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none" />
+              </div>
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Hedge Type</label>
+                <select value={hedgeFormData.tipe_hedging} onChange={e => setHedgeFormData({...hedgeFormData, tipe_hedging: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
+                  <option value="forward">Forward</option>
+                  <option value="option">Option</option>
+                  <option value="swap">Swap</option>
+                  <option value="futures">Futures</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Contract Value</label>
+                <input type="number" value={hedgeFormData.nilai_kontrak} onChange={e => setHedgeFormData({...hedgeFormData, nilai_kontrak: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none" />
+              </div>
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Currency</label>
+                <select value={hedgeFormData.mata_uang} onChange={e => setHedgeFormData({...hedgeFormData, mata_uang: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none">
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Start Date</label>
+                  <input type="date" value={hedgeFormData.tanggal_mulai} onChange={e => setHedgeFormData({...hedgeFormData, tanggal_mulai: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
+                </div>
+                <div>
+                  <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Expiry Date</label>
+                  <input type="date" value={hedgeFormData.tanggal_jatuh_tempo} onChange={e => setHedgeFormData({...hedgeFormData, tanggal_jatuh_tempo: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none [color-scheme:dark]" />
+                </div>
+              </div>
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Premium Cost</label>
+                <input type="number" value={hedgeFormData.biaya_premium} onChange={e => setHedgeFormData({...hedgeFormData, biaya_premium: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none" />
+              </div>
+              <div>
+                <label className="block font-label-xs text-label-xs text-on-surface-variant mb-1">Financial Institution</label>
+                <input type="text" value={hedgeFormData.institusi_keuangan} onChange={e => setHedgeFormData({...hedgeFormData, institusi_keuangan: e.target.value})} className="w-full bg-[#0F1B2D] border border-[#1E3A5F] text-white rounded p-2 text-sm focus:border-[#0891B2] outline-none" />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-[#0A1628] border-t border-[#1E3A5F] p-4 shrink-0 flex flex-col gap-3">
+              <button onClick={handleNewHedgeSubmit} className="w-full h-10 bg-[#0891B2] text-white font-bold rounded flex items-center justify-center hover:bg-[#067A96] transition-colors cursor-pointer">
+                Create Hedge
+              </button>
+              <button 
+                onClick={() => setShowNewHedge(false)}
+                className="w-full h-10 bg-transparent text-on-surface-variant font-bold rounded flex items-center justify-center hover:text-white hover:bg-surface-variant/20 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
