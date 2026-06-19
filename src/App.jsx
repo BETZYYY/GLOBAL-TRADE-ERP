@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 import useAuthStore       from './stores/authStore'
 import ProtectedRoute     from './components/ProtectedRoute'
@@ -25,6 +26,30 @@ export default function App() {
 
   return (
     <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1E2D44',
+            color: '#F8FAFC',
+            border: '1px solid #1E3A5F',
+            borderRadius: '12px',
+            fontSize: '14px',
+          },
+          success: {
+            iconTheme: { primary: '#0D9488', secondary: '#F8FAFC' },
+            style: {
+              borderLeft: '4px solid #0D9488',
+            }
+          },
+          error: {
+            iconTheme: { primary: '#DC2626', secondary: '#F8FAFC' },
+            style: {
+              borderLeft: '4px solid #DC2626',
+            }
+          },
+        }}
+      />
       <SocketManager />
       <Routes>
         {/* ── Public ──────────────────────────────────────────────────────── */}

@@ -8,5 +8,6 @@ router.use(authenticate);
 router.get('/',          ctrl.list);
 router.post('/',         requireRole('treasury_officer', 'finance_manager', 'admin'), ctrl.create);
 router.get('/recommend', ctrl.recommend);
+router.post('/recommend', ctrl.postRecommend);
 
 module.exports = router;

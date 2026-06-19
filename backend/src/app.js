@@ -72,7 +72,7 @@ app.use('/api/alerts',         alertsRoutes);            // NEW: /api/alerts
 app.use('/api/dashboard',      dashboardRoutes);         // NEW: /api/dashboard
 // Legacy / additional
 app.use('/api/currency-basket', currencyBasketRoutes);
-app.use('/api/payment-terms',   paymentTermsRoutes);
+app.use('/api/payment-terms', paymentTermsRoutes);
 app.use('/api/crypto',          cryptoRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
@@ -133,7 +133,9 @@ app.use((err, _req, res, _next) => {
       console.log(`\n📋  Routes:`);
       console.log(`    POST /api/auth/login`);
       console.log(`    GET  /api/transactions`);
+      console.log(`    POST /api/transactions`);
       console.log(`    GET  /api/rates`);
+      console.log(`    GET  /api/rates/latest?from=USD&to=IDR`);
       console.log(`    POST /api/risk/calculate`);
       console.log(`    GET  /api/hedging`);
       console.log(`    POST /api/credit-risk/score`);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../lib/api';
 import useRisk from '../hooks/useRisk';
 import useTransactions from '../hooks/useTransactions';
@@ -46,17 +47,35 @@ export default function RiskDetail() {
     { type: 'info', actor: 'B. Wijaya', role: 'Treasury Officer', time: '09:35 AM', desc: 'Drafted transaction' }
   ];
 
+  const translateMessage = (msg) => {
+    if (!msg) return msg;
+    return msg
+      .replace('mendekati batas kerugian yang ditetapkan. Segera lakukan review hedging.', 'approaching the defined loss limit. Immediate hedging review required.')
+      .replace('melampaui batas risiko maksimum. Eskalasi segera diperlukan!', 'exceeded maximum risk threshold. Immediate escalation required!')
+      .replace('PERHATIAN KRITIS:', 'CRITICAL ALERT:')
+      .replace('Transaksi', 'Transaction')
+      .replace('mendekati', 'approaching')
+      .replace('Segera', 'Immediately')
+      .replace('tinggi', 'high')
+      .replace('sedang', 'medium')
+      .replace('rendah', 'low')
+      .replace('kritis', 'critical')
+      .replace('darurat', 'emergency')
+      .replace('peringatan', 'warning');
+  };
+
   const activities = (activityLog && activityLog.length > 0) ? activityLog.map(entry => {
-    const isCritical = entry.tingkat_keparahan === 'darurat' || entry.tingkat_keparahan === 'kritis' || entry.pesan_peringatan?.toLowerCase().includes('critical');
-    const isWarning = entry.tingkat_keparahan === 'peringatan' || entry.pesan_peringatan?.toLowerCase().includes('warning');
+    const isCritical = entry.tingkat_keparahan === 'darurat' || entry.tingkat_keparahan === 'kritis' || entry.pesan_peringatan?.toLowerCase().includes('critical') || entry.level_keparahan === 'emergency' || entry.level_keparahan === 'critical';
+    const isWarning = entry.tingkat_keparahan === 'peringatan' || entry.pesan_peringatan?.toLowerCase().includes('warning') || entry.level_keparahan === 'warning';
     return {
       type: isCritical ? 'critical' : isWarning ? 'warning' : 'info',
       actor: entry.nama_pengguna || entry.jenis_aksi || 'System',
       role: 'System',
       time: (entry.timestamp_aksi || entry.timestamp_peringatan) ? new Date(entry.timestamp_aksi || entry.timestamp_peringatan).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '',
-      desc: entry.pesan_peringatan || entry.jenis_aksi || entry.desc
+      desc: translateMessage(entry.pesan_peringatan || entry.jenis_aksi || entry.desc)
     };
   }) : mockActivityLog;
+
 
   const handleForwardContract = async () => {
     try {
@@ -68,7 +87,7 @@ export default function RiskDetail() {
         tanggal_mulai: new Date().toISOString().split('T')[0],
         tanggal_jatuh_tempo: tx?.tanggal_transaksi?.split('T')[0]
       });
-      alert('Forward Contract applied successfully');
+      toast.success('Forward Contract applied successfully');
     } catch (err) {
       console.error(err);
     }
@@ -84,7 +103,7 @@ export default function RiskDetail() {
         tanggal_mulai: new Date().toISOString().split('T')[0],
         tanggal_jatuh_tempo: tx?.tanggal_transaksi?.split('T')[0]
       });
-      alert('Option Contract applied successfully');
+      toast.success('Option Contract applied successfully');
     } catch (err) {
       console.error(err);
     }
@@ -92,20 +111,26 @@ export default function RiskDetail() {
 
   const handleApprove = async () => {
     try {
-      await api.patch(`/transactions/${id}/approve`);
-      fetchTransactions();
+      await api.patch(
+        `/transactions/${id}/approve`,
+        { status_pembayaran: 'processing' }
+      );
+      toast.success('Transaction approved successfully');
+      window.location.reload();
     } catch (err) {
+      toast.error('Approve failed: ' + err.message);
       console.error(err);
     }
   };
 
   const handleReject = async () => {
-    const reason = prompt('Rejection reason:');
-    if (!reason) return;
+    const reason = 'Rejected via RiskDetail Dashboard';
     try {
       await api.patch(`/transactions/${id}/reject`, { reason });
-      fetchTransactions();
+      toast.success('Transaction rejected successfully');
+      window.location.reload();
     } catch (err) {
+      toast.error('Reject failed: ' + err.message);
       console.error(err);
     }
   };

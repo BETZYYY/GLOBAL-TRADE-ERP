@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import useTransactions from '../hooks/useTransactions';
 import useRisk from '../hooks/useRisk';
+import api from '../lib/api';
 
 function fmt(n) {
   return new Intl.NumberFormat('en-US', { notation: 'standard', maximumFractionDigits: 2 }).format(n);
@@ -20,6 +22,7 @@ export default function Transactions() {
   const [currencyFilter, setCurrencyFilter] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('SWIFT');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     mata_uang_asal: 'USD',
@@ -39,13 +42,49 @@ export default function Transactions() {
     });
   }, [fetchTransactions, statusFilter, riskFilter, currencyFilter]);
 
+  // Fallback rates (IDR per 1 unit of foreign currency)
+  const fallbackRates = { USD: 15750, EUR: 17120, JPY: 104, GBP: 19870 };
+
   const handleSubmit = async () => {
-    if (!formData.mata_uang_asal || !formData.jumlah_asal) {
-      alert('Please fill all required fields');
+    if (!formData.mata_uang_asal || !formData.mata_uang_tujuan || !formData.jumlah_asal) {
+      toast.error('Please fill all required fields');
       return;
     }
+    setIsSubmitting(true);
     try {
-      const newTx = await createTransaction({ ...formData, metode_pembayaran: paymentMethod });
+      // 1. Fetch latest exchange rate for the selected pair
+      let rateId = null;
+      let exchangeRate = fallbackRates[formData.mata_uang_asal] || 15750;
+
+      try {
+        const rateRes = await api.get(
+          `/rates/latest?from=${formData.mata_uang_asal}&to=${formData.mata_uang_tujuan}`
+        );
+        const rateData = rateRes.data?.data;
+        if (rateData) {
+          rateId = rateData.id_kurs;
+          exchangeRate = Number(rateData.nilai_kurs) || exchangeRate;
+        }
+      } catch {
+        // Endpoint unavailable — use fallback rates silently
+        console.warn('Rate endpoint unavailable, using fallback rate:', exchangeRate);
+      }
+
+      // 2. Build payload with all backend-required field names
+      const payload = {
+        id_kurs:            rateId,
+        mata_uang_asal:     formData.mata_uang_asal,
+        mata_uang_tujuan:   formData.mata_uang_tujuan,
+        jumlah_asal:        Number(formData.jumlah_asal),
+        jumlah_tujuan:      Number(formData.jumlah_asal) * exchangeRate,
+        nilai_tukar_pakai:  exchangeRate,
+        metode_pembayaran:  paymentMethod.toLowerCase(),
+        tanggal_transaksi:  formData.tanggal_transaksi,
+        catatan:            formData.catatan || ''
+      };
+
+      // 3. Submit transaction
+      const newTx = await createTransaction(payload);
       if (newTx && newTx.id_transaksi) {
         await calculateRisk(newTx.id_transaksi);
       }
@@ -53,6 +92,8 @@ export default function Transactions() {
       fetchTransactions({ status: statusFilter, risk_level: riskFilter, mata_uang_asal: currencyFilter });
     } catch (err) {
       console.error('Failed to create transaction:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -101,7 +142,9 @@ export default function Transactions() {
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none bg-transparent border-none outline-none text-white font-body text-body w-full p-0 h-full focus:ring-0 cursor-pointer">
                 <option value="">All Status</option>
                 <option value="pending">Pending</option>
-                <option value="settled">Settled</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
               </select>
               <span className="material-symbols-outlined text-on-surface-variant text-[16px] absolute right-2 pointer-events-none">expand_more</span>
             </div>
@@ -323,33 +366,49 @@ export default function Transactions() {
               </div>
 
               {/* Exposure Preview Card */}
-              <div className="bg-[#1E2D44] border-l-2 border-[#0891B2] p-4 rounded-lg mt-4 shadow-inner">
-                <div className="font-h3-caps text-h3-caps text-on-surface-variant uppercase mb-3 tracking-wide">Exposure Preview</div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-on-surface-variant">Current Rate</span>
-                    <span className="text-white font-data-mono">1 USD = 15,450 IDR</span>
+              {(() => {
+                const previewRate = fallbackRates[formData.mata_uang_asal] || 15750;
+                const previewAmount = Number(formData.jumlah_asal) || 0;
+                const previewIDR = previewAmount * previewRate;
+                return (
+                  <div className="bg-[#1E2D44] border-l-2 border-[#0891B2] p-4 rounded-lg mt-4 shadow-inner">
+                    <div className="font-h3-caps text-h3-caps text-on-surface-variant uppercase mb-3 tracking-wide">Exposure Preview</div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-on-surface-variant">Est. Rate</span>
+                        <span className="text-white font-data-mono">1 {formData.mata_uang_asal} = {previewRate.toLocaleString()} {formData.mata_uang_tujuan}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-on-surface-variant text-sm">{formData.mata_uang_tujuan} Equivalent</span>
+                        <span className="text-white text-[20px] font-bold font-data-mono">
+                          {formData.mata_uang_tujuan === 'IDR' ? 'Rp ' : ''}{previewIDR.toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm pt-2 border-t border-[#1E3A5F]">
+                        <span className="text-on-surface-variant">Est. Risk Level</span>
+                        <span className="text-on-surface-variant italic">Auto-calculated on submit</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-[11px] text-on-surface-variant italic text-right">
+                      Live rate fetched at submission time
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-on-surface-variant text-sm">IDR Equivalent</span>
-                    <span className="text-white text-[20px] font-bold font-data-mono">Rp 0</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm pt-2 border-t border-[#1E3A5F]">
-                    <span className="text-on-surface-variant">Est. Risk Level</span>
-                    <span className="text-on-surface-variant italic">Calculating after submit...</span>
-                  </div>
-                </div>
-                <div className="mt-3 text-[11px] text-on-surface-variant italic text-right">
-                  Risk score auto-calculated on submission
-                </div>
-              </div>
+                );
+              })()}
 
             </div>
 
             {/* Footer */}
             <div className="bg-[#0A1628] border-t border-[#1E3A5F] p-4 shrink-0 flex flex-col gap-3">
-              <button onClick={handleSubmit} className="w-full h-10 bg-[#0891B2] text-white font-bold rounded flex items-center justify-center hover:bg-[#067A96] transition-colors cursor-pointer">
-                Submit Transaction
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="w-full h-10 bg-[#0891B2] text-white font-bold rounded flex items-center justify-center hover:bg-[#067A96] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+              >
+                {isSubmitting && (
+                  <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
+                )}
+                {isSubmitting ? 'Submitting...' : 'Submit Transaction'}
               </button>
               <button 
                 onClick={() => setIsDrawerOpen(false)}

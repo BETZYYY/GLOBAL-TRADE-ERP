@@ -6,6 +6,18 @@
   body {
     @apply bg-brand-midnight-base text-[#d6e3ff] antialiased;
   }
+  
+  select option {
+    background-color: #16243B !important;
+    color: #F8FAFC !important;
+  }
+
+  select {
+    background-color: #16243B;
+    color: #F8FAFC;
+    border: 1px solid #1E3A5F;
+    border-radius: 8px;
+  }
 }
 
 @layer components {

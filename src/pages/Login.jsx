@@ -117,13 +117,13 @@ export default function Login() {
             margin: 0, fontSize: '22px', fontWeight: 700,
             color: '#F0F9FF', letterSpacing: '-0.3px',
           }}>
-            GlobalTrade ERP
+            GLOBALTRADE ERP
           </h1>
           <p style={{
             margin: '6px 0 0', fontSize: '13.5px',
             color: '#64748B', letterSpacing: '0.2px',
           }}>
-            Sistem Manajemen Keuangan & Risiko
+            Currency & Payment Risk Manager
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export default function Login() {
               display: 'block', fontSize: '12.5px', fontWeight: 600,
               color: '#94A3B8', marginBottom: '7px', letterSpacing: '0.3px',
             }}>
-              EMAIL
+              Email Address
             </label>
             <div style={{ position: 'relative' }}>
               <span style={{
@@ -173,7 +173,7 @@ export default function Login() {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="nama@globaltrade.co.id"
+                placeholder="name@globaltrade.com"
                 autoComplete="email"
                 style={{
                   width: '100%', boxSizing: 'border-box',
@@ -197,7 +197,7 @@ export default function Login() {
               display: 'block', fontSize: '12.5px', fontWeight: 600,
               color: '#94A3B8', marginBottom: '7px', letterSpacing: '0.3px',
             }}>
-              PASSWORD
+              Password
             </label>
             <div style={{ position: 'relative' }}>
               <span style={{
@@ -273,7 +273,7 @@ export default function Login() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
                   <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                 </svg>
-                Memverifikasi...
+                Verifying...
               </>
             ) : (
               <>
@@ -282,7 +282,7 @@ export default function Login() {
                   <polyline points="10 17 15 12 10 7"/>
                   <line x1="15" y1="12" x2="3" y2="12"/>
                 </svg>
-                Masuk ke Sistem
+                Sign In
               </>
             )}
           </button>
@@ -295,7 +295,7 @@ export default function Login() {
           textAlign: 'center',
         }}>
           <p style={{ margin: 0, fontSize: '11.5px', color: '#334155' }}>
-            © 2024 GlobalTrade ERP · Sistem Keuangan Internasional
+            © 2024 GLOBALTRADE ERP · International Financial System
           </p>
         </div>
       </div>

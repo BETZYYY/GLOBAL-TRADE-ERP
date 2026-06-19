@@ -181,4 +181,37 @@ async function calculate(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { calculate };
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/risk/transaction/:id
+// ─────────────────────────────────────────────────────────────────────────────
+async function getByTransaction(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await pool.query(
+      `SELECT r.*,
+              r.skor_volatilitas          AS skor_risiko,
+              t.mata_uang_asal,
+              t.mata_uang_tujuan,
+              t.jumlah_asal,
+              t.tanggal_transaksi,
+              t.nomor_referensi,
+              p.nama_lengkap              AS nama_analyst
+       FROM tb_analisis_risiko r
+       LEFT JOIN tb_transaksi_pembayaran t ON t.id_transaksi = r.id_transaksi
+       LEFT JOIN tb_pengguna             p ON p.id_pengguna  = r.id_analyst
+       WHERE r.id_transaksi = ?
+       ORDER BY r.timestamp_analisis DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ success: true, data: null });
+    }
+
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) { next(err); }
+}
+
+module.exports = { calculate, getByTransaction };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import useCreditRisk from '../hooks/useCreditRisk';
 
 export default function CreditRisk() {
@@ -6,21 +7,27 @@ export default function CreditRisk() {
   const [entityName, setEntityName] = useState('Tanaka Trading');
   const [jurisdiction, setJurisdiction] = useState('Japan');
   const [sector, setSector] = useState('Manufacturing');
+  const [paymentHistory, setPaymentHistory] = useState('Good');
   const [hasFinancials, setHasFinancials] = useState(true);
 
   // Since we don't fetch initially without a specific ID in the hook, let's just use the form state
   // to show the assessment if data exists, otherwise show a placeholder or default UI.
 
   const handleCalculate = () => {
-    calculateScore({ name: entityName, jurisdiction, sector, hasFinancials });
-  };
-
-  // If we just loaded the page and there's no data, let's auto-calculate for the mock UI feeling
-  useEffect(() => {
-    if (!data && !loading) {
-      calculateScore({ name: 'Tanaka Trading', jurisdiction: 'Japan', sector: 'Manufacturing', hasFinancials: true });
+    if (!entityName || !jurisdiction) {
+      toast.error('Please fill Entity Name and Jurisdiction');
+      return;
     }
-  }, []); // run once on mount only
+    
+    calculateScore({ 
+      company_name: entityName, 
+      country: jurisdiction, 
+      payment_history: paymentHistory,
+      sector: sector, 
+      annual_volume: 1000000,
+      has_financials: hasFinancials 
+    });
+  };
 
   const score = data?.skor_kredit || 72;
   const rating = data?.rating || 'A-';
@@ -100,6 +107,24 @@ export default function CreditRisk() {
                         onChange={e => setSector(e.target.value)}
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 group">
+                  <label className="font-label-xs text-label-xs text-on-surface-variant uppercase">Payment History</label>
+                  <div className="bg-[#0F1B2D] border border-[#1E3A5F] rounded-md px-3 py-2 flex items-center focus-within:border-[#0891B2] transition-colors">
+                    <span className="material-symbols-outlined text-on-surface-variant mr-2 text-sm">history</span>
+                    <select 
+                      className="bg-transparent border-none text-white text-sm p-0 w-full focus:ring-0 outline-none appearance-none" 
+                      value={paymentHistory}
+                      onChange={(e) => setPaymentHistory(e.target.value)}
+                    >
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                    <span className="material-symbols-outlined text-on-surface-variant text-sm absolute right-7 pointer-events-none">expand_more</span>
                   </div>
                 </div>
               </div>

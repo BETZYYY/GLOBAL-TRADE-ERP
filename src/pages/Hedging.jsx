@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useHedging from '../hooks/useHedging';
+import toast from 'react-hot-toast';
 import useAuthStore from '../stores/authStore';
 
 const formatCur = (value) => {
@@ -57,14 +58,14 @@ export default function Hedging() {
   const handleRecommend = async (e) => {
     e.preventDefault();
     if (!form.mata_uang_dari || !form.jumlah) {
-      alert('Please fill Currency Pair and Exposure Amount');
+      toast.error('Please fill Currency Pair and Exposure Amount');
       return;
     }
     setIsLoading(true);
     try {
       const result = await recommendHedging({
         currency_pair: `${form.mata_uang_dari}/${form.mata_uang_ke}`,
-        exposure_amount: form.jumlah,
+        exposure_amount: Number(form.jumlah),
         target_date: form.target_date,
         risk_tolerance: form.risk_tolerance || 20
       });

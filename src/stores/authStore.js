@@ -76,6 +76,11 @@ const useAuthStore = create(
           }
         }
 
+        // Clear zustand-persist localStorage key + any legacy keys
+        localStorage.removeItem('globaltrade-auth');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
         set({ token: null, user: null, error: null });
       },
 

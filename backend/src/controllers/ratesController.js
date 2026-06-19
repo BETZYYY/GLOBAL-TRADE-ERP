@@ -14,7 +14,7 @@ const TARGET_PAIRS = [
 ];
 
 // ── GET /api/rates ─────────────────────────────────────────────────────────────
-// Latest rate for each currency pair
+// All latest rates (one per pair)
 async function latest(req, res, next) {
   try {
     const [rows] = await pool.execute(
@@ -32,6 +32,45 @@ async function latest(req, res, next) {
     );
 
     return ok(res, rows);
+  } catch (err) { next(err); }
+}
+
+// ── GET /api/rates/latest?from=USD&to=IDR ──────────────────────────────────────
+// Single-pair latest rate with fallback when DB has no data yet
+const FALLBACK_RATES = { USD: 15750, EUR: 17120, JPY: 104, GBP: 19870, SGD: 11520 };
+
+async function latestForPair(req, res, next) {
+  try {
+    const { from, to } = req.query;
+    if (!from || !to) {
+      return fail(res, 'Query params "from" and "to" are required. Example: ?from=USD&to=IDR');
+    }
+
+    const [rows] = await pool.execute(
+      `SELECT * FROM tb_nilai_tukar
+       WHERE kode_mata_uang_dari = ?
+         AND kode_mata_uang_ke   = ?
+       ORDER BY timestamp_fetch DESC
+       LIMIT 1`,
+      [from.toUpperCase(), to.toUpperCase()]
+    );
+
+    if (rows.length === 0) {
+      // No DB data yet — return a synthetic row with fallback rate
+      const fallbackRate = FALLBACK_RATES[from.toUpperCase()] || 15750;
+      return ok(res, {
+        id_kurs:              null,
+        kode_mata_uang_dari:  from.toUpperCase(),
+        kode_mata_uang_ke:    to.toUpperCase(),
+        nilai_kurs:           fallbackRate,
+        kurs_beli:            fallbackRate * 0.9975,
+        kurs_jual:            fallbackRate * 1.0025,
+        sumber_api:           'fallback',
+        timestamp_fetch:      new Date().toISOString(),
+      });
+    }
+
+    return ok(res, rows[0]);
   } catch (err) { next(err); }
 }
 
@@ -129,4 +168,4 @@ async function fetchFromAPI(req, res, next) {
   }
 }
 
-module.exports = { latest, history, fetchFromAPI };
+module.exports = { latest, latestForPair, history, fetchFromAPI };

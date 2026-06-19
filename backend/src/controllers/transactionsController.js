@@ -107,28 +107,57 @@ async function getOne(req, res, next) {
 // ── POST /api/transactions ────────────────────────────────────────────────────
 async function create(req, res, next) {
   try {
-    const {
+    let {
       id_kurs, mata_uang_asal, mata_uang_tujuan,
-      jumlah_asal, nilai_tukar_pakai, metode_pembayaran, catatan,
+      jumlah_asal, jumlah_tujuan, nilai_tukar_pakai,
+      metode_pembayaran, tanggal_transaksi, catatan,
     } = req.body;
 
-    if (!id_kurs || !mata_uang_asal || !mata_uang_tujuan || !jumlah_asal || !nilai_tukar_pakai) {
-      return fail(res, 'Required fields: id_kurs, mata_uang_asal, mata_uang_tujuan, jumlah_asal, nilai_tukar_pakai');
+    // Validate truly required fields (id_kurs can be null — handled below)
+    if (!mata_uang_asal || !mata_uang_tujuan || !jumlah_asal || !nilai_tukar_pakai) {
+      return fail(res, 'Required fields: mata_uang_asal, mata_uang_tujuan, jumlah_asal, nilai_tukar_pakai');
+    }
+
+    // If no id_kurs provided (fallback rate path), insert a synthetic rate row first
+    if (!id_kurs) {
+      const FALLBACK_RATES = { USD: 15750, EUR: 17120, JPY: 104, GBP: 19870, SGD: 11520 };
+      const rate       = parseFloat(nilai_tukar_pakai) || FALLBACK_RATES[mata_uang_asal] || 15750;
+      const spread     = rate * 0.0025;
+      id_kurs          = crypto.randomUUID();
+      const now        = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+      await pool.execute(
+        `INSERT INTO tb_nilai_tukar
+           (id_kurs, kode_mata_uang_dari, kode_mata_uang_ke,
+            nilai_kurs, kurs_beli, kurs_jual,
+            sumber_api, timestamp_fetch, is_realtime)
+         VALUES (?, ?, ?, ?, ?, ?, 'fallback', ?, FALSE)`,
+        [id_kurs, mata_uang_asal, mata_uang_tujuan,
+         rate, parseFloat((rate - spread).toFixed(6)),
+         parseFloat((rate + spread).toFixed(6)), now]
+      );
     }
 
     const nomor_referensi = await generateRef();
     const id_transaksi    = crypto.randomUUID();
-    const jumlah_tujuan   = parseFloat((parseFloat(jumlah_asal) * parseFloat(nilai_tukar_pakai)).toFixed(2));
+    const computed_tujuan = jumlah_tujuan
+      ?? parseFloat((parseFloat(jumlah_asal) * parseFloat(nilai_tukar_pakai)).toFixed(2));
+    const tx_date         = tanggal_transaksi || new Date().toISOString().slice(0, 10);
 
     await pool.execute(
       `INSERT INTO tb_transaksi_pembayaran
          (id_transaksi, nomor_referensi, id_pengguna, id_kurs,
           mata_uang_asal, mata_uang_tujuan, jumlah_asal, jumlah_tujuan,
-          nilai_tukar_pakai, metode_pembayaran, status_pembayaran, tanggal_transaksi, catatan)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), ?)`,
+          nilai_tukar_pakai, metode_pembayaran, status_pembayaran,
+          tanggal_transaksi, catatan)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
       [id_transaksi, nomor_referensi, req.user.id, id_kurs,
-       mata_uang_asal, mata_uang_tujuan, jumlah_asal, jumlah_tujuan,
-       nilai_tukar_pakai, metode_pembayaran || null, catatan || null]
+       mata_uang_asal, mata_uang_tujuan,
+       parseFloat(jumlah_asal), computed_tujuan,
+       parseFloat(nilai_tukar_pakai),
+       metode_pembayaran || null,
+       tx_date,
+       catatan || null]
     );
 
     const [[trx]] = await pool.execute(
@@ -160,7 +189,7 @@ async function approve(req, res, next) {
 
     await pool.execute(
       `UPDATE tb_transaksi_pembayaran
-       SET status_pembayaran = 'completed'
+       SET status_pembayaran = 'processing'
        WHERE id_transaksi = ?`, [req.params.id]
     );
 
@@ -168,20 +197,20 @@ async function approve(req, res, next) {
       id_pengguna: req.user.id, jenis_aksi: 'UPDATE',
       tabel_terdampak: 'tb_transaksi_pembayaran', id_record: req.params.id,
       data_sebelum: { status_pembayaran: trx.status_pembayaran },
-      data_sesudah:  { status_pembayaran: 'completed' },
+      data_sesudah:  { status_pembayaran: 'processing' },
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return ok(res, { id_transaksi: req.params.id, status_pembayaran: 'completed' },
-      `Transaction ${trx.nomor_referensi} approved successfully.`);
+    return res.json({ success: true, message: 'Transaction approved', data: { id_transaksi: req.params.id, status_pembayaran: 'processing' } });
   } catch (err) { next(err); }
 }
 
 // ── PATCH /api/transactions/:id/reject ───────────────────────────────────────
 async function reject(req, res, next) {
   try {
-    const { alasan } = req.body;
-    if (!alasan) return fail(res, 'Rejection reason is required.');
+    const { alasan, reason } = req.body;
+    const rejectReason = reason || alasan;
+    if (!rejectReason) return fail(res, 'Rejection reason is required.');
 
     const [[trx]] = await pool.execute(
       'SELECT * FROM tb_transaksi_pembayaran WHERE id_transaksi = ?', [req.params.id]
@@ -197,19 +226,18 @@ async function reject(req, res, next) {
        SET status_pembayaran = 'cancelled',
            catatan = CONCAT(COALESCE(catatan,''), '\n[DITOLAK] ', ?)
        WHERE id_transaksi = ?`,
-      [alasan, req.params.id]
+      [rejectReason, req.params.id]
     );
 
     await writeAudit({
       id_pengguna: req.user.id, jenis_aksi: 'UPDATE',
       tabel_terdampak: 'tb_transaksi_pembayaran', id_record: req.params.id,
       data_sebelum: { status_pembayaran: trx.status_pembayaran },
-      data_sesudah:  { status_pembayaran: 'cancelled', alasan },
+      data_sesudah:  { status_pembayaran: 'cancelled', alasan: rejectReason },
       ip_address: ip(req), status_aksi: 'sukses',
     });
 
-    return ok(res, { id_transaksi: req.params.id, status_pembayaran: 'cancelled' },
-      `Transaksi ${trx.nomor_referensi} ditolak.`);
+    return res.json({ success: true, message: 'Transaction rejected', data: { id_transaksi: req.params.id, status_pembayaran: 'cancelled' } });
   } catch (err) { next(err); }
 }
 

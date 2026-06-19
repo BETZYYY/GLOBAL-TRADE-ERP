@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import useTransactions from '../hooks/useTransactions';
 import api from '../lib/api';
 
@@ -46,7 +47,7 @@ export default function CryptoSettlement() {
 
   const handleSettle = async () => {
     if (!validateWallet(formData.wallet_address, formData.network)) {
-      alert('Invalid wallet address format');
+      toast.error('Invalid wallet address format');
       return;
     }
     try {

@@ -1,4 +1,18 @@
+import toast from 'react-hot-toast';
+
 export default function Reports() {
+  const handleExport = (title) => {
+    const csvContent = "data:text/csv;charset=utf-8,Mock,Data,For," + title.replace(/,/g, '') + "\n1,2,3,4\n5,6,7,8";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${title.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${title} successfully`);
+  };
+
   return (
     <div className="pt-20 px-gutter pb-gutter flex-1 flex flex-col gap-6 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-end w-full">
@@ -6,7 +20,7 @@ export default function Reports() {
           <h1 className="font-h1 text-h1 text-on-surface">Reports</h1>
           <p className="font-body text-body text-on-surface-variant mt-1">Export and review financial risk reports</p>
         </div>
-        <button className="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer">
+        <button onClick={() => handleExport('All Reports')} className="h-button_height bg-[#0891B2] text-white px-4 rounded-lg font-label-xs text-label-xs flex items-center gap-2 hover:bg-[#067A96] transition-colors cursor-pointer">
           <span className="material-symbols-outlined text-[18px]">download</span>
           Export All
         </button>
@@ -31,7 +45,7 @@ export default function Reports() {
             </div>
             <div className="mt-auto flex justify-between items-center">
               <span className="text-[11px] text-on-surface-variant font-data-mono">{r.date}</span>
-              <button className="flex items-center gap-1 text-[#0891B2] text-[12px] font-bold hover:underline cursor-pointer">
+              <button onClick={(e) => { e.stopPropagation(); handleExport(r.title); }} className="flex items-center gap-1 text-[#0891B2] text-[12px] font-bold hover:underline cursor-pointer">
                 <span className="material-symbols-outlined text-[14px]">download</span> Export
               </button>
             </div>

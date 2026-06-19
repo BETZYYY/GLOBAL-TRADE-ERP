@@ -1,9 +1,12 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import useAuthStore from '../../stores/authStore';
 
 export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
 
   const navItems = [
     { path: '/', icon: 'dashboard', label: 'Dashboard' },
@@ -15,6 +18,11 @@ export default function Sidebar() {
     { path: '/crypto-settlement', icon: 'currency_bitcoin', label: 'Crypto Settlement' },
     { path: '/reports', icon: 'assessment', label: 'Reports' },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <nav
@@ -39,10 +47,16 @@ export default function Sidebar() {
           );
         })}
       </div>
-      <div className="mt-auto px-2 w-full flex justify-center">
-        <div className="flex items-center w-full justify-center py-3 rounded hover:bg-[#16243B] cursor-pointer" title="S. Miller">
-          <img alt="Finance Manager Profile" className="w-8 h-8 rounded-full border border-[#1E3A5F] object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANp2GXvqluu45rSOmuHB3_uwZft6WVmRI0SPFgCRi2hgvlSZbALbzmOpA5nLZDVDWM-PFI8nPyw46smLOmzZNj2ebCyxFGbgXkotv-Y-hDZTm5lPCwQniZ_CVW3-IgsSddC2-77v-xwiHjkBx7wt_0i9KlvSNP5i0ic0z1rYmULISjmtxYUNcK3EXuF8OUHhtY5-ZQNTF8JG49rU7CUCBr2w_uGKgWtnOckhG3CKoyyC7i4UgxMHb2hBLeNZmWKjoM2PugekfzePQ" />
-        </div>
+
+      {/* Bottom: Logout Button */}
+      <div className="mt-auto px-2 w-full flex flex-col items-center gap-2">
+        <button
+          onClick={handleLogout}
+          title="Logout"
+          className="flex justify-center items-center w-full p-3 rounded-lg text-[#475569] hover:text-[#DC2626] hover:bg-[#DC2626]/10 transition-colors cursor-pointer"
+        >
+          <span className="material-symbols-outlined flex-shrink-0 text-[22px]">logout</span>
+        </button>
       </div>
     </nav>
   );
